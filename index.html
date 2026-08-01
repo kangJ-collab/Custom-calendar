@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" id="themeColorMeta" content="#f5f6f8">
+  <title>Custom Calendar — Stage 7</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/static/woff2/SUIT.css">
+  <link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="app-header">
+      <div class="brand-block">
+        <p class="eyebrow">CUSTOM CALENDAR</p>
+        <h1 id="appTitle">나의 달력</h1>
+      </div>
+      <button class="icon-button" id="quickActionButton" type="button" aria-label="날짜 상태와 사용자 입력 설정 바로가기">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3M1 14h6M9 8h6m2 8h6"/></svg>
+      </button>
+    </header>
+
+    <main class="main-content">
+      <section class="view active" id="calendarView" data-view="calendar" aria-labelledby="calendarHeading">
+        <div class="month-toolbar">
+          <button class="month-button" id="prevMonthButton" type="button" aria-label="이전 달">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <button class="month-title-button" id="todayButton" type="button">
+            <strong id="calendarHeading"></strong>
+            <span>오늘로 이동</span>
+          </button>
+          <button class="month-button" id="nextMonthButton" type="button" aria-label="다음 달">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <section class="calendar-card" aria-label="월간 달력">
+          <div class="weekday-row" role="row">
+            <span role="columnheader">일</span><span role="columnheader">월</span><span role="columnheader">화</span><span role="columnheader">수</span><span role="columnheader">목</span><span role="columnheader">금</span><span role="columnheader">토</span>
+          </div>
+          <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="월간 날짜"></div>
+        </section>
+
+        <section class="detail-accordion" id="detailAccordion">
+          <button class="detail-summary" id="detailToggle" type="button" aria-expanded="false" aria-controls="detailContent">
+            <span class="detail-summary-copy">
+              <strong id="detailSummaryTitle">오늘 일정 및 메모 상세보기</strong>
+              <small id="detailSummaryMeta">선택한 날짜의 상세 내용을 확인합니다</small>
+            </span>
+            <svg class="accordion-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="detail-content" id="detailContent" hidden>
+            <div class="detail-section" data-detail-section="status">
+              <span class="section-label" id="detailStatusSectionLabel">날짜 상태</span>
+              <div class="status-line">
+                <span class="status-swatch" id="detailStatusSwatch"></span>
+                <strong id="detailStatus">상태 없음</strong>
+              </div>
+              <div class="status-choice-grid" id="statusChoiceGrid" aria-label="날짜 상태 선택"></div>
+            </div>
+
+            <div class="detail-section" data-detail-section="memo">
+              <label class="section-label" id="detailMemoSectionLabel" for="detailMemoInput">일정 및 메모</label>
+              <textarea class="memo-input" id="detailMemoInput" maxlength="300" rows="4" placeholder="선택한 날짜의 일정이나 메모를 입력하세요"></textarea>
+            </div>
+
+            <div class="detail-section" data-detail-section="fields">
+              <span class="section-label" id="detailFieldsSectionLabel">사용자 입력 항목</span>
+              <div class="custom-field-values" id="customFieldValues"></div>
+              <p class="empty-copy" id="customFieldEmpty">설정에서 사용자 입력 항목을 추가할 수 있습니다.</p>
+            </div>
+
+            <div class="detail-section" data-detail-section="calculations">
+              <span class="section-label" id="detailCalculationsSectionLabel">계산 결과</span>
+              <div class="calculation-result-list" id="dateCalculationResults"></div>
+              <p class="empty-copy" id="dateCalculationEmpty">설정에서 계산식을 추가하면 이 날짜의 결과가 표시됩니다.</p>
+            </div>
+
+            <div class="detail-actions">
+              <button class="secondary-action" id="clearDateButton" type="button">날짜 입력 지우기</button>
+              <button class="primary-action" id="saveDateButton" type="button">이 날짜 저장</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="home-calculation-section" id="homeCalculationSection">
+          <div class="section-head">
+            <div>
+              <span class="section-label">CALCULATION</span>
+              <h3>홈 계산 카드</h3>
+            </div>
+          </div>
+          <div class="home-calculation-cards" id="homeCalculationCards"></div>
+          <p class="empty-copy" id="homeCalculationEmpty">홈에 표시하도록 설정한 계산식이 없습니다.</p>
+        </section>
+
+        <aside class="onboarding-card" id="onboardingCard">
+          <div>
+            <span class="section-label">7단계</span>
+            <strong>템플릿을 고르고 복제하고 내 방식으로 발전시키세요</strong>
+            <p>교대·업무·라이더·가족·간호사 등 기본 템플릿을 미리 보고 부분 적용하거나 내 템플릿으로 복제할 수 있습니다.</p>
+          </div>
+          <button type="button" id="customizeCtaButton">템플릿 라이브러리</button>
+        </aside>
+      </section>
+
+      <section class="view" id="summaryView" data-view="summary" aria-labelledby="summaryHeading" hidden>
+        <div class="page-heading">
+          <span class="section-label">SUMMARY</span>
+          <h2 id="summaryHeading">요약</h2>
+          <p>이번 달에 저장된 날짜 상태와 입력값을 간단하게 확인합니다.</p>
+        </div>
+        <div class="summary-grid" id="summaryGrid"></div>
+        <section class="summary-list-card">
+          <div class="section-head">
+            <div>
+              <span class="section-label">계산 결과</span>
+              <h3>이번 달 사용자 계산</h3>
+            </div>
+          </div>
+          <div id="monthCalculationResults" class="calculation-result-list"></div>
+          <p class="empty-copy" id="monthCalculationEmpty">월간 계산식이 없습니다.</p>
+        </section>
+
+        <section class="summary-list-card">
+          <div class="section-head">
+            <div>
+              <span class="section-label">상태별 집계</span>
+              <h3>이번 달 날짜 상태</h3>
+            </div>
+          </div>
+          <div id="statusSummaryList" class="status-summary-list"></div>
+        </section>
+      </section>
+
+      <section class="view" id="settingsView" data-view="settings" aria-labelledby="settingsHeading" hidden>
+        <div class="page-heading">
+          <span class="section-label">CUSTOM STUDIO</span>
+          <h2 id="settingsHeading">설정</h2>
+          <p>6단계에서는 달력 칸·상세보기·요약 화면의 표시 항목과 용어를 직접 구성합니다.</p>
+        </div>
+
+        <section class="settings-panel" id="templateSettingsPanel">
+          <div class="section-head">
+            <div>
+              <span class="section-label">템플릿</span>
+              <h3>빠른 시작 템플릿</h3>
+            </div>
+          </div>
+          <p class="panel-description">적용할 구성만 선택할 수 있습니다. 날짜별 기록은 삭제하지 않습니다.</p>
+          <div class="template-apply-options" aria-label="템플릿 적용 범위">
+            <label><input id="applyTemplateStatuses" type="checkbox" checked> 날짜 상태</label>
+            <label><input id="applyTemplateFields" type="checkbox" checked> 사용자 필드</label>
+            <label><input id="applyTemplatePattern" type="checkbox" checked> 반복 패턴</label>
+            <label><input id="applyTemplateCalculations" type="checkbox" checked> 계산식</label>
+            <label><input id="applyTemplateTheme" type="checkbox"> 테마</label>
+            <label><input id="applyTemplateLayout" type="checkbox" checked> 화면 구성·용어</label>
+          </div>
+          <div class="template-library-toolbar">
+            <label class="template-search">
+              <span class="sr-only">템플릿 검색</span>
+              <input id="templateSearchInput" type="search" maxlength="40" placeholder="템플릿 검색">
+            </label>
+            <select id="templateCategoryFilter" aria-label="템플릿 분류">
+              <option value="all">전체 분류</option>
+              <option value="general">일반</option>
+              <option value="shift">교대근무</option>
+              <option value="work">업무·수입</option>
+              <option value="life">생활·가족</option>
+              <option value="custom">내 템플릿</option>
+            </select>
+          </div>
+          <div class="template-grid" id="templateGrid"></div>
+          <div class="data-actions template-data-actions">
+            <button class="secondary-action" id="saveCurrentTemplateButton" type="button">현재 구성을 템플릿으로 저장</button>
+            <button class="secondary-action" id="exportTemplateButton" type="button">템플릿 내보내기</button>
+            <button class="secondary-action" id="importTemplateButton" type="button">템플릿 가져오기</button>
+          </div>
+          <input id="templateFileInput" type="file" accept=".json" hidden>
+        </section>
+
+        <section class="settings-panel" id="patternSettingsPanel">
+          <div class="section-head">
+            <div>
+              <span class="section-label">반복 패턴</span>
+              <h3>날짜 상태 자동 반복</h3>
+            </div>
+          </div>
+          <div class="pattern-form">
+            <label class="switch-row">
+              <span><strong>반복 패턴 사용</strong><small>직접 지정한 날짜 상태가 패턴보다 우선합니다.</small></span>
+              <input id="patternEnabled" type="checkbox">
+            </label>
+            <div class="form-field">
+              <label for="patternName">패턴 이름</label>
+              <input id="patternName" maxlength="30">
+            </div>
+            <div class="form-field">
+              <label for="patternAnchorDate">기준일</label>
+              <input id="patternAnchorDate" type="date">
+            </div>
+            <div>
+              <span class="form-label">현재 순서</span>
+              <div class="pattern-sequence" id="patternSequence"></div>
+            </div>
+            <div>
+              <span class="form-label">상태 추가</span>
+              <div class="pattern-palette" id="patternPalette"></div>
+            </div>
+            <div class="data-actions">
+              <button class="secondary-action" id="removePatternLastButton" type="button">마지막 제거</button>
+              <button class="primary-action" id="savePatternButton" type="button">패턴 저장</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="settings-panel" id="calculationSettingsPanel">
+          <div class="section-head">
+            <div>
+              <span class="section-label">계산식</span>
+              <h3>사용자 계산 카드</h3>
+            </div>
+            <button class="compact-button" id="addCalculationButton" type="button">추가</button>
+          </div>
+          <p class="panel-description">숫자 필드 합계, 날짜 상태 횟수, 선택 날짜 값에 곱하기·더하기를 적용할 수 있습니다.</p>
+          <div class="editor-list" id="calculationEditorList"></div>
+        </section>
+
+        <section class="settings-panel" id="statusSettingsPanel">
+          <div class="section-head">
+            <div>
+              <span class="section-label">날짜 상태</span>
+              <h3>달력 칸에 표시할 상태</h3>
+            </div>
+            <button class="compact-button" id="addStatusButton" type="button">추가</button>
+          </div>
+          <p class="panel-description">예: 출근, 휴무, 운동, 가족, 마감. 최대 12개까지 만들 수 있습니다.</p>
+          <div class="editor-list" id="statusEditorList"></div>
+        </section>
+
+        <section class="settings-panel" id="fieldSettingsPanel">
+          <div class="section-head">
+            <div>
+              <span class="section-label">사용자 입력 항목</span>
+              <h3>날짜별로 저장할 필드</h3>
+            </div>
+            <button class="compact-button" id="addFieldButton" type="button">추가</button>
+          </div>
+          <p class="panel-description">텍스트, 숫자, 체크 항목을 만들 수 있습니다. 최대 12개까지 지원합니다.</p>
+          <div class="editor-list" id="fieldEditorList"></div>
+        </section>
+
+        <section class="settings-panel" id="themeSettingsPanel">
+          <div class="section-head">
+            <div>
+              <span class="section-label">THEME STUDIO</span>
+              <h3>달력 테마</h3>
+            </div>
+          </div>
+          <p class="panel-description">색상과 모서리, 화면 밀도를 즉시 미리 보고 저장합니다.</p>
+          <div class="theme-preset-grid" id="themePresetGrid"></div>
+          <div class="theme-editor-grid">
+            <div class="form-field"><label for="themeBackground">배경색</label><input id="themeBackground" type="color"></div>
+            <div class="form-field"><label for="themeSurface">카드색</label><input id="themeSurface" type="color"></div>
+            <div class="form-field"><label for="themeAccent">강조색</label><input id="themeAccent" type="color"></div>
+            <div class="form-field"><label for="themeText">글자색</label><input id="themeText" type="color"></div>
+            <div class="form-field">
+              <label for="themeRadius">모서리</label>
+              <select id="themeRadius">
+                <option value="compact">작게</option>
+                <option value="balanced">기본</option>
+                <option value="round">둥글게</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="themeDensity">화면 밀도</label>
+              <select id="themeDensity">
+                <option value="compact">촘촘하게</option>
+                <option value="comfortable">기본</option>
+                <option value="spacious">여유롭게</option>
+              </select>
+            </div>
+          </div>
+          <div class="data-actions">
+            <button class="secondary-action" id="resetThemeButton" type="button">기본 테마</button>
+            <button class="primary-action" id="saveThemeButton" type="button">테마 저장</button>
+          </div>
+        </section>
+
+        <section class="settings-panel" id="layoutSettingsPanel">
+          <div class="section-head">
+            <div>
+              <span class="section-label">화면 구성</span>
+              <h3>제목·바로가기·하단 메뉴</h3>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="calendarTitleInput">달력 이름</label>
+            <input id="calendarTitleInput" maxlength="30">
+          </div>
+          <div class="form-field">
+            <label for="quickActionTarget">우측 상단 바로가기</label>
+            <select id="quickActionTarget">
+              <option value="templates">템플릿</option>
+              <option value="pattern">반복 패턴</option>
+              <option value="calculations">계산식</option>
+              <option value="statuses">날짜 상태</option>
+              <option value="fields">사용자 필드</option>
+              <option value="theme">테마</option>
+            </select>
+          </div>
+          <div class="layout-subsection">
+            <span class="form-label">화면 용어</span>
+            <div class="layout-term-grid">
+              <div class="form-field"><label for="termStatus">상태 명칭</label><input id="termStatus" maxlength="16"></div>
+              <div class="form-field"><label for="termMemo">메모 명칭</label><input id="termMemo" maxlength="16"></div>
+              <div class="form-field"><label for="termFields">입력 항목 명칭</label><input id="termFields" maxlength="16"></div>
+              <div class="form-field"><label for="termCalculations">계산 결과 명칭</label><input id="termCalculations" maxlength="16"></div>
+            </div>
+          </div>
+          <div class="layout-subsection">
+            <span class="form-label">달력 칸 표시 정보</span>
+            <div class="layout-order-editor" id="cellItemEditor"></div>
+            <div class="inline-form-grid">
+              <div class="form-field">
+                <label for="cellFieldSelect">달력 칸 필드</label>
+                <select id="cellFieldSelect"></select>
+              </div>
+              <div class="form-field">
+                <label for="cellCalculationSelect">달력 칸 계산 결과</label>
+                <select id="cellCalculationSelect"></select>
+              </div>
+            </div>
+          </div>
+          <div class="layout-subsection">
+            <span class="form-label">상세보기 구성</span>
+            <div class="layout-order-editor" id="detailItemEditor"></div>
+          </div>
+          <div class="layout-subsection">
+            <span class="form-label">요약 카드 구성</span>
+            <div class="layout-order-editor" id="summaryItemEditor"></div>
+          </div>
+          <div class="layout-subsection">
+            <span class="form-label">하단 메뉴 순서와 이름</span>
+            <div class="nav-order-editor" id="navOrderEditor"></div>
+          </div>
+          <div class="data-actions">
+            <button class="primary-action" id="saveLayoutButton" type="button">화면 구성 저장</button>
+          </div>
+        </section>
+
+        <section class="settings-panel">
+          <div class="section-head">
+            <div>
+              <span class="section-label">데이터</span>
+              <h3>현재 단계 데이터 관리</h3>
+            </div>
+          </div>
+          <div class="data-actions">
+            <button class="secondary-action" id="exportButton" type="button">JSON 내보내기</button>
+            <button class="danger-action" id="resetButton" type="button">6단계 데이터 초기화</button>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" id="bottomNav" aria-label="하단 내비게이션">
+      <button class="nav-item active" type="button" data-target="calendar" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Z"/></svg>
+        <span>달력</span>
+      </button>
+      <button class="nav-item" type="button" data-target="summary">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9m6 10V5m6 14v-7m4 7H2"/></svg>
+        <span>요약</span>
+      </button>
+      <button class="nav-item" type="button" data-target="settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.18.38.44.72.76.99.32.27.72.41 1.14.41H21v4h-.09a1.7 1.7 0 0 0-1.51.6Z"/></svg>
+        <span>설정</span>
+      </button>
+    </nav>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="modal-backdrop" id="editorModal" hidden>
+    <section class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="editorModalTitle">
+      <div class="modal-head">
+        <h2 id="editorModalTitle">항목 편집</h2>
+        <button class="modal-close" id="modalCloseButton" type="button" aria-label="닫기">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form id="editorForm">
+        <input type="hidden" id="editorKind">
+        <input type="hidden" id="editorId">
+        <div class="form-field">
+          <label for="editorName">이름</label>
+          <input id="editorName" maxlength="20" required>
+        </div>
+        <div class="form-field" id="editorShortNameWrap">
+          <label for="editorShortName">달력 표시</label>
+          <input id="editorShortName" maxlength="4" placeholder="최대 4자">
+        </div>
+        <div class="form-field" id="editorColorWrap">
+          <label for="editorColor">색상</label>
+          <input id="editorColor" type="color" value="#365f73">
+        </div>
+        <div class="form-field" id="editorTypeWrap">
+          <label for="editorType">입력 형식</label>
+          <select id="editorType">
+            <option value="text">텍스트</option>
+            <option value="number">숫자</option>
+            <option value="currency">금액</option>
+            <option value="checkbox">체크</option>
+            <option value="select">선택 목록</option>
+            <option value="time">시간</option>
+            <option value="date">날짜</option>
+          </select>
+        </div>
+        <div class="form-field" id="editorOptionsWrap" hidden>
+          <label for="editorOptions">선택 항목</label>
+          <input id="editorOptions" maxlength="200" placeholder="쉼표로 구분: A, B, C">
+        </div>
+        <div class="form-field" id="editorUnitWrap" hidden>
+          <label for="editorUnit">단위</label>
+          <input id="editorUnit" maxlength="10" placeholder="시간, 원, km">
+        </div>
+        <div class="inline-form-grid" id="editorNumberRulesWrap" hidden>
+          <div class="form-field"><label for="editorMin">최솟값</label><input id="editorMin" type="number" step="any"></div>
+          <div class="form-field"><label for="editorMax">최댓값</label><input id="editorMax" type="number" step="any"></div>
+        </div>
+        <div class="form-field" id="editorDefaultWrap">
+          <label for="editorDefault">기본값</label>
+          <input id="editorDefault" maxlength="100">
+        </div>
+        <label class="switch-row" id="editorRequiredWrap">
+          <span><strong>필수 입력</strong><small>저장할 때 빈 값을 허용하지 않습니다.</small></span>
+          <input id="editorRequired" type="checkbox">
+        </label>
+        <div class="modal-actions">
+          <button class="secondary-action" id="modalCancelButton" type="button">취소</button>
+          <button class="primary-action" type="submit">저장</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="templatePreviewModal" hidden>
+    <section class="modal-sheet template-preview-sheet" role="dialog" aria-modal="true" aria-labelledby="templatePreviewTitle">
+      <div class="modal-head">
+        <div>
+          <span class="section-label" id="templatePreviewCategory">TEMPLATE</span>
+          <h2 id="templatePreviewTitle">템플릿 미리보기</h2>
+        </div>
+        <button class="modal-close" id="templatePreviewClose" type="button" aria-label="닫기">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <p class="template-preview-description" id="templatePreviewDescription"></p>
+      <div class="template-preview-meta" id="templatePreviewMeta"></div>
+      <div class="template-preview-section">
+        <strong>날짜 상태</strong>
+        <div class="template-preview-chips" id="templatePreviewStatuses"></div>
+      </div>
+      <div class="template-preview-section">
+        <strong>사용자 필드</strong>
+        <div class="template-preview-list" id="templatePreviewFields"></div>
+      </div>
+      <div class="template-preview-section">
+        <strong>반복 패턴</strong>
+        <p id="templatePreviewPattern"></p>
+      </div>
+      <div class="template-preview-section">
+        <strong>계산식</strong>
+        <div class="template-preview-list" id="templatePreviewCalculations"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary-action" id="templatePreviewDuplicate" type="button">내 템플릿으로 복제</button>
+        <button class="primary-action" id="templatePreviewApply" type="button">선택 범위 적용</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="templateNameModal" hidden>
+    <section class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="templateNameModalTitle">
+      <div class="modal-head">
+        <h2 id="templateNameModalTitle">현재 구성을 템플릿으로 저장</h2>
+        <button class="modal-close" id="templateNameModalClose" type="button" aria-label="닫기">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form id="templateNameForm">
+        <div class="form-field">
+          <label for="customTemplateName">템플릿 이름</label>
+          <input id="customTemplateName" maxlength="30" required placeholder="예: 우리 회사 교대 달력">
+        </div>
+        <div class="form-field">
+          <label for="customTemplateDescription">설명</label>
+          <input id="customTemplateDescription" maxlength="80" placeholder="이 템플릿의 용도를 입력하세요">
+        </div>
+        <div class="modal-actions">
+          <button class="secondary-action" id="templateNameModalCancel" type="button">취소</button>
+          <button class="primary-action" type="submit">저장</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+    <div class="modal-backdrop" id="calculationModal" hidden>
+    <section class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="calculationModalTitle">
+      <div class="modal-head">
+        <h2 id="calculationModalTitle">계산식 추가</h2>
+        <button class="modal-close" id="calculationModalClose" type="button" aria-label="닫기">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form id="calculationForm">
+        <input id="calculationId" type="hidden">
+        <div class="form-field">
+          <label for="calculationName">결과 이름</label>
+          <input id="calculationName" maxlength="30" required placeholder="예: 이번 달 순수익">
+        </div>
+        <div class="inline-form-grid">
+          <div class="form-field">
+            <label for="calculationScope">집계 범위</label>
+            <select id="calculationScope">
+              <option value="date">선택 날짜</option>
+              <option value="month">이번 달</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="calculationOperator">연산</label>
+            <select id="calculationOperator">
+              <option value="add">더하기</option>
+              <option value="subtract">빼기</option>
+              <option value="multiply">곱하기</option>
+              <option value="divide">나누기</option>
+              <option value="min">최솟값</option>
+              <option value="max">최댓값</option>
+            </select>
+          </div>
+        </div>
+
+        <fieldset class="operand-fieldset">
+          <legend>기준값 A</legend>
+          <div class="form-field">
+            <label for="calcLeftType">종류</label>
+            <select id="calcLeftType">
+              <option value="field">숫자·금액 필드</option>
+              <option value="statusCount">날짜 상태 횟수</option>
+              <option value="constant">고정 숫자</option>
+            </select>
+          </div>
+          <div class="form-field" id="calcLeftSourceWrap">
+            <label for="calcLeftSource">대상</label>
+            <select id="calcLeftSource"></select>
+          </div>
+          <div class="form-field" id="calcLeftConstantWrap" hidden>
+            <label for="calcLeftConstant">고정 숫자</label>
+            <input id="calcLeftConstant" type="number" step="any" value="0">
+          </div>
+        </fieldset>
+
+        <fieldset class="operand-fieldset">
+          <legend>기준값 B</legend>
+          <div class="form-field">
+            <label for="calcRightType">종류</label>
+            <select id="calcRightType">
+              <option value="field">숫자·금액 필드</option>
+              <option value="statusCount">날짜 상태 횟수</option>
+              <option value="constant">고정 숫자</option>
+            </select>
+          </div>
+          <div class="form-field" id="calcRightSourceWrap">
+            <label for="calcRightSource">대상</label>
+            <select id="calcRightSource"></select>
+          </div>
+          <div class="form-field" id="calcRightConstantWrap" hidden>
+            <label for="calcRightConstant">고정 숫자</label>
+            <input id="calcRightConstant" type="number" step="any" value="0">
+          </div>
+        </fieldset>
+
+        <div class="inline-form-grid">
+          <div class="form-field">
+            <label for="calculationMultiply">결과에 곱하기</label>
+            <input id="calculationMultiply" type="number" step="any" value="1">
+          </div>
+          <div class="form-field">
+            <label for="calculationAdd">결과에 더하기</label>
+            <input id="calculationAdd" type="number" step="any" value="0">
+          </div>
+        </div>
+        <div class="inline-form-grid">
+          <div class="form-field">
+            <label for="calculationDecimals">소수점 자리</label>
+            <select id="calculationDecimals">
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="calculationSuffix">단위</label>
+            <input id="calculationSuffix" maxlength="10" placeholder="원, 시간, 회">
+          </div>
+        </div>
+        <label class="switch-row">
+          <span><strong>홈 계산 카드 표시</strong><small>달력 아래에 계산 결과를 카드로 표시합니다.</small></span>
+          <input id="calculationShowOnHome" type="checkbox">
+        </label>
+        <div class="calculation-preview" id="calculationPreview" aria-live="polite"></div>
+        <div class="modal-actions">
+          <button class="secondary-action" id="calculationModalCancel" type="button">취소</button>
+          <button class="primary-action" type="submit">저장</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

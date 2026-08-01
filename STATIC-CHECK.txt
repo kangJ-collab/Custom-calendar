@@ -1,0 +1,16 @@
+42 cells: PASS
+no innerHTML: PASS
+no outerHTML: PASS
+no eval: PASS
+detail term title: PASS
+Korean particle: PASS
+layout draft declarations: PASS
+11 built-in templates: PASS
+template search: PASS
+template preview: PASS
+template duplicate: PASS
+template layout apply: PASS
+nurse nonrepeat: PASS
+template layout sanitize: PASS
+node syntax: PASS
+DOM ids: PASS
