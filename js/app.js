@@ -1,5 +1,5 @@
-const STORAGE_KEY = "custom-calendar-stage8-v1";
-const LEGACY_STORAGE_KEYS = ["custom-calendar-stage7-v1", "custom-calendar-stage6-v1", "custom-calendar-stage5-v1", "custom-calendar-stage4-v1", "custom-calendar-stage3-v1", "custom-calendar-stage2-v1"];
+const STORAGE_KEY = "custom-calendar-v1.0.0";
+const LEGACY_STORAGE_KEYS = ["custom-calendar-stage10-v1", "custom-calendar-stage8-v1", "custom-calendar-stage7-v1", "custom-calendar-stage6-v1", "custom-calendar-stage5-v1", "custom-calendar-stage4-v1", "custom-calendar-stage3-v1", "custom-calendar-stage2-v1"];
 const MAX_STATUSES = 12;
 const MAX_FIELDS = 12;
 const MAX_CALCULATIONS = 20;
@@ -629,41 +629,14 @@ function sanitizeTemplate(template, fallbackId = "custom") {
   };
 }
 
-
-function repairMojibakeText(value) {
-  const text = String(value ?? "");
-  if (!/[\u00C3\u00C2\u00F0\u00EB\u00EC\u00ED\u00EA\u00E6\u00EF\u00BF\u00BD]/.test(text)) return text;
-  try {
-    const chars = Array.from(text);
-    if (chars.some(char => char.charCodeAt(0) > 255)) return text;
-    const bytes = Uint8Array.from(chars.map(char => char.charCodeAt(0)));
-    const decoded = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
-    return /[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(decoded) ? decoded : text;
-  } catch {
-    return text;
-  }
-}
-function repairMojibakeData(value, depth = 0) {
-  if (depth > 12) return value;
-  if (typeof value === "string") return repairMojibakeText(value);
-  if (Array.isArray(value)) return value.map(item => repairMojibakeData(item, depth + 1));
-  if (!value || typeof value !== "object") return value;
-  const repaired = {};
-  for (const [key, item] of Object.entries(value)) {
-    if (["__proto__", "constructor", "prototype"].includes(key)) continue;
-    repaired[key] = repairMojibakeData(item, depth + 1);
-  }
-  return repaired;
-}
-
 function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return sanitizeState(repairMojibakeData(JSON.parse(saved)));
+    if (saved) return sanitizeState(JSON.parse(saved));
     for (const legacyKey of LEGACY_STORAGE_KEYS) {
       const legacy = localStorage.getItem(legacyKey);
       if (!legacy) continue;
-      const migrated = sanitizeState(repairMojibakeData(JSON.parse(legacy)));
+      const migrated = sanitizeState(JSON.parse(legacy));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
       return migrated;
     }
@@ -680,6 +653,9 @@ let patternDraft = [...state.pattern.sequence];
 let layoutDraft = structuredClone(state.layout);
 let layoutDraftDirty = false;
 let previewTemplateId = "";
+let dateAutosaveTimer = 0;
+let dateSaveState = "saved";
+const DATE_AUTOSAVE_DELAY = 550;
 
 const holidays = new Map([
   ["2026-08-15", "광복절"],
@@ -693,6 +669,7 @@ const elements = {
   dateSheetBackdrop: document.querySelector("#dateSheetBackdrop"),
   dateSheet: document.querySelector("#dateSheet"),
   dateSheetTitle: document.querySelector("#dateSheetTitle"),
+  dateSaveStatus: document.querySelector("#dateSaveStatus"),
   monthPickerButton: document.querySelector("#monthPickerButton"),
   monthPickerModal: document.querySelector("#monthPickerModal"),
   yearPickerInput: document.querySelector("#yearPickerInput"),
@@ -854,7 +831,7 @@ function isEntryEmpty(entry) {
   return !Object.values(entry.fields || {}).some(value => value === true || String(value ?? "").trim() !== "");
 }
 
-function renderCalendar() {
+function renderCalendar(refreshDetail = true) {
   const viewDate = parseISO(state.viewDate);
   const selectedDate = parseISO(state.selectedDate);
   const year = viewDate.getFullYear();
@@ -904,7 +881,7 @@ function renderCalendar() {
     fragment.append(button);
   }
   elements.calendarGrid.append(fragment);
-  if (!elements.dateSheetBackdrop.hidden) renderDetail();
+  if (refreshDetail && !elements.dateSheetBackdrop.hidden) renderDetail();
 }
 function createCalendarCellLine(itemId, context) {
   const { iso, entry, status, holidayName } = context;
@@ -953,24 +930,88 @@ function getReadableTextColor(hex) {
 }
 
 function openDateSheet(restoreFocus = true) {
-  if (restoreFocus) modalLastFocus = document.querySelector(`.day-cell[data-date="${state.selectedDate}"]`) || document.activeElement;
+  flushDateAutosave({ refreshSheet: false, silent: true });
+  if (restoreFocus) {
+    modalLastFocus = document.querySelector(`.day-cell[data-date="${state.selectedDate}"]`) || document.activeElement;
+  }
   renderDetail();
+  setDateSaveStatus("saved");
   elements.dateSheetBackdrop.hidden = false;
   document.body.style.overflow = "hidden";
   requestAnimationFrame(() => document.querySelector("#dateSheetClose").focus());
 }
-function hasUnsavedDateChanges() {
-  const stored = cloneEntry(getEntry(state.selectedDate));
-  const current = cloneEntry(draftEntry);
-  current.memo = elements.detailMemoInput.value;
-  collectCustomFieldDraft(current);
-  return JSON.stringify(stored) !== JSON.stringify(current);
-}
-function closeDateSheet(force = false) {
-  if (!force && hasUnsavedDateChanges() && !confirm("저장하지 않은 날짜 기록이 있습니다. 닫을까요?")) return;
+function closeDateSheet() {
+  flushDateAutosave({ refreshSheet: false, silent: true });
   elements.dateSheetBackdrop.hidden = true;
   document.body.style.overflow = "";
   if (modalLastFocus instanceof HTMLElement) modalLastFocus.focus();
+}
+function setDateSaveStatus(status) {
+  dateSaveState = status;
+  const labels = {
+    saving: "저장 중…",
+    saved: "저장됨",
+    error: "저장 실패 · 다시 시도"
+  };
+  elements.dateSaveStatus.dataset.saveStatus = status;
+  elements.dateSaveStatus.textContent = labels[status] || labels.saved;
+  elements.dateSaveStatus.disabled = status !== "error";
+}
+function collectDateSheetDraft() {
+  if (!draftEntry) draftEntry = cloneEntry(getEntry(state.selectedDate));
+  draftEntry.memo = elements.detailMemoInput.value.trim().slice(0, 300);
+  collectCustomFieldDraft(draftEntry);
+  for (const field of state.fields) {
+    if (!Object.prototype.hasOwnProperty.call(draftEntry.fields, field.id)) continue;
+    draftEntry.fields[field.id] = sanitizeFieldValue(field, draftEntry.fields[field.id]);
+  }
+  return draftEntry;
+}
+function scheduleDateAutosave({ immediate = false } = {}) {
+  clearTimeout(dateAutosaveTimer);
+  setDateSaveStatus("saving");
+  if (immediate) {
+    flushDateAutosave({ refreshSheet: false });
+    return;
+  }
+  dateAutosaveTimer = window.setTimeout(
+    () => flushDateAutosave({ refreshSheet: false }),
+    DATE_AUTOSAVE_DELAY
+  );
+}
+function flushDateAutosave({ refreshSheet = false, silent = false } = {}) {
+  clearTimeout(dateAutosaveTimer);
+  dateAutosaveTimer = 0;
+  if (!draftEntry || !state.selectedDate) return true;
+  collectDateSheetDraft();
+  const nextEntry = cloneEntry(draftEntry);
+  const previousEntry = cloneEntry(getEntry(state.selectedDate));
+  const changed = JSON.stringify(previousEntry) !== JSON.stringify(nextEntry);
+  if (!changed) {
+    setDateSaveStatus("saved");
+    return true;
+  }
+
+  const previousStored = state.entries[state.selectedDate]
+    ? cloneEntry(state.entries[state.selectedDate])
+    : null;
+  if (isEntryEmpty(nextEntry)) delete state.entries[state.selectedDate];
+  else state.entries[state.selectedDate] = nextEntry;
+
+  if (!saveState()) {
+    if (previousStored) state.entries[state.selectedDate] = previousStored;
+    else delete state.entries[state.selectedDate];
+    setDateSaveStatus("error");
+    if (!silent) showToast("날짜 기록을 저장하지 못했습니다.");
+    return false;
+  }
+
+  draftEntry = cloneEntry(getEntry(state.selectedDate));
+  setDateSaveStatus("saved");
+  renderCalendar(refreshSheet);
+  renderSummary();
+  if (!elements.dateSheetBackdrop.hidden) renderDateCalculations();
+  return true;
 }
 function renderDetail() {
   const selectedDate = parseISO(state.selectedDate);
@@ -1208,36 +1249,23 @@ function createCalculationResult(name, value) {
   return row;
 }
 
-function saveSelectedDate() {
-  draftEntry.memo = elements.detailMemoInput.value.trim().slice(0, 300);
-  for (const field of state.fields) {
-    const input = elements.customFieldValues.querySelector(`[data-field-id="${field.id}"]`);
-    if (!input) continue;
-    let value;
-    if (field.type === "checkbox") value = input.checked;
-    else value = input.value;
-    value = sanitizeFieldValue(field, value);
-    const empty = value === "" || value === null || value === undefined;
-    if (field.required && empty) {
-      showToast(`${field.name} 항목은 필수입니다.`);
-      input.focus();
-      return;
-    }
-    draftEntry.fields[field.id] = value;
-  }
-  if (isEntryEmpty(draftEntry)) delete state.entries[state.selectedDate];
-  else state.entries[state.selectedDate] = cloneEntry(draftEntry);
-  saveState();
-  renderCalendar();
-  renderSummary();
-  showToast("선택한 날짜를 저장했습니다.");
+function retryDateAutosave() {
+  if (dateSaveState === "error") flushDateAutosave({ refreshSheet: false });
 }
 function clearSelectedDate() {
+  clearTimeout(dateAutosaveTimer);
+  dateAutosaveTimer = 0;
   delete state.entries[state.selectedDate];
-  saveState();
-  renderCalendar();
+  draftEntry = { statusId: "", memo: "", fields: {} };
+  if (!saveState()) {
+    setDateSaveStatus("error");
+    return;
+  }
+  setDateSaveStatus("saved");
+  renderCalendar(false);
   renderSummary();
-  showToast("선택한 날짜의 입력을 지웠습니다.");
+  renderDetail();
+  showToast("선택한 날짜의 기록을 지웠습니다.");
 }
 
 function renderSummary() {
@@ -1445,59 +1473,6 @@ function describeExpression(calculation) {
   const operatorLabels = { add: "+", subtract: "−", multiply: "×", divide: "÷", min: "min", max: "max" };
   return `${operandLabel(calculation.left)} ${operatorLabels[calculation.operator]} ${operandLabel(calculation.right)}`;
 }
-
-function applyTheme(theme, persist = false) {
-  const safeTheme = {
-    background: safeColor(theme?.background),
-    surface: safeColor(theme?.surface),
-    accent: safeColor(theme?.accent),
-    text: safeColor(theme?.text),
-    radius: ["compact", "balanced", "round"].includes(theme?.radius) ? theme.radius : "balanced",
-    density: ["compact", "comfortable", "spacious"].includes(theme?.density) ? theme.density : "comfortable"
-  };
-  const root = document.documentElement;
-  root.style.setProperty("--bg", safeTheme.background);
-  root.style.setProperty("--surface", safeTheme.surface);
-  root.style.setProperty("--surface-soft", mixHex(safeTheme.surface, safeTheme.background, 0.55));
-  root.style.setProperty("--text", safeTheme.text);
-  root.style.setProperty("--text-soft", mixHex(safeTheme.text, safeTheme.background, 0.48));
-  root.style.setProperty("--line", mixHex(safeTheme.text, safeTheme.background, 0.82));
-  root.style.setProperty("--accent", safeTheme.accent);
-  root.style.setProperty("--accent-soft", mixHex(safeTheme.accent, safeTheme.background, 0.82));
-  root.style.setProperty("--today-ring", safeTheme.accent);
-  root.style.setProperty("--selected", mixHex(safeTheme.accent, safeTheme.background, 0.72));
-  document.body.dataset.radius = safeTheme.radius;
-  document.body.dataset.density = safeTheme.density;
-  elements.themeColorMeta.setAttribute("content", safeTheme.background);
-  if (persist) {
-    state.theme = safeTheme;
-    saveState();
-  }
-}
-function mixHex(foreground, background, ratio) {
-  const fg = hexToRgb(safeColor(foreground));
-  const bg = hexToRgb(safeColor(background));
-  const mix = channel => Math.round(fg[channel] * (1 - ratio) + bg[channel] * ratio);
-  return `#${[mix("r"), mix("g"), mix("b")].map(value => value.toString(16).padStart(2, "0")).join("")}`;
-}
-function hexToRgb(hex) {
-  return {
-    r: parseInt(hex.slice(1, 3), 16),
-    g: parseInt(hex.slice(3, 5), 16),
-    b: parseInt(hex.slice(5, 7), 16)
-  };
-}
-function themeFromInputs() {
-  return {
-    background: elements.themeBackground.value,
-    surface: elements.themeSurface.value,
-    accent: elements.themeAccent.value,
-    text: elements.themeText.value,
-    radius: elements.themeRadius.value,
-    density: elements.themeDensity.value
-  };
-}
-
 function renderThemeEditor() {
   elements.themePresetGrid.replaceChildren();
   for (const preset of THEME_PRESETS) {
@@ -2386,20 +2361,20 @@ function showToast(message) {
 }
 function exportData() {
   const payload = {
-    exportFormat: "custom-calendar-stage8",
+    exportFormat: "custom-calendar-stage10",
     createdAt: new Date().toISOString(),
     data: state
   };
-  downloadJson(payload, `custom-calendar-stage8-${localISO(new Date())}.json`);
+  downloadJson(payload, `custom-calendar-stage10-${localISO(new Date())}.json`);
   showToast("JSON 백업 파일을 만들었습니다.");
 }
 function resetData() {
-  if (!confirm("8단계에서 저장한 템플릿 라이브러리, 화면 구성, 고급 기록 항목, 계산 결과, 패턴, 테마, 날짜별 기록을 모두 초기화할까요?")) return;
+  if (!confirm("10단계에서 저장한 템플릿, 화면 구성, 기록 항목, 계산 결과, 패턴, 테마와 날짜별 기록을 모두 초기화할까요?")) return;
   state = createDefaultState();
   saveState();
   setView("calendar");
   renderAll();
-  showToast("8단계 데이터를 초기화했습니다.");
+  showToast("10단계 데이터를 초기화했습니다.");
 }
 function renderAll() {
   applyTheme(state.theme);
@@ -2414,11 +2389,6 @@ function renderAll() {
 
 let pickerMonth = 0;
 let swipeStartX = 0, swipeStartY = 0, swipeConsumed = false;
-function changeMonth(delta) {
-  const current = parseISO(state.viewDate);
-  state.viewDate = localISO(createLocalDate(current.getFullYear(), current.getMonth() + delta, 1));
-  saveState(); renderCalendar();
-}
 function openMonthPicker() {
   const current = parseISO(state.viewDate);
   elements.yearPickerInput.value = String(current.getFullYear());
@@ -2442,7 +2412,13 @@ function renderMonthPicker() {
 function closeMonthPicker() { elements.monthPickerModal.hidden=true; document.body.style.overflow=""; if(modalLastFocus instanceof HTMLElement) modalLastFocus.focus(); }
 function applyMonthPicker() {
   const year=Math.max(1900,Math.min(2200,Number(elements.yearPickerInput.value)||new Date().getFullYear()));
-  state.viewDate=localISO(createLocalDate(year,pickerMonth,1)); saveState(); renderCalendar(); closeMonthPicker();
+  const next = createLocalDate(year, pickerMonth, 1);
+  state.viewDate = localISO(next);
+  state.selectedDate = localISO(next);
+  saveState();
+  renderCalendar();
+  renderSummary();
+  closeMonthPicker();
 }
 document.querySelector("#prevMonthButton").addEventListener("click", () => changeMonth(-1));
 document.querySelector("#nextMonthButton").addEventListener("click", () => changeMonth(1));
@@ -2452,7 +2428,7 @@ document.querySelector("#quickActionButton").addEventListener("click", () => {
   const panelId = QUICK_ACTION_PANEL[state.layout.quickActionTarget] || "statusSettingsPanel";
   document.querySelector(`#${panelId}`).scrollIntoView({ behavior: "smooth", block: "start" });
 });
-document.querySelector("#saveDateButton").addEventListener("click", saveSelectedDate);
+elements.dateSaveStatus.addEventListener("click", retryDateAutosave);
 document.querySelector("#clearDateButton").addEventListener("click", clearSelectedDate);
 document.querySelector("#addStatusButton").addEventListener("click", () => openEditor("status"));
 document.querySelector("#addFieldButton").addEventListener("click", () => openEditor("field"));
@@ -2638,6 +2614,13 @@ elements.statusChoiceGrid.addEventListener("click", event => {
     : "상태 없음";
   elements.detailStatusSwatch.style.background = status?.color || "#b4bec5";
   renderStatusChoices();
+  scheduleDateAutosave();
+});
+elements.detailMemoInput.addEventListener("input", () => scheduleDateAutosave());
+elements.customFieldValues.addEventListener("input", () => scheduleDateAutosave());
+elements.customFieldValues.addEventListener("change", () => scheduleDateAutosave());
+elements.customFieldValues.addEventListener("focusout", () => {
+  if (!elements.dateSheetBackdrop.hidden) scheduleDateAutosave({ immediate: true });
 });
 elements.monthPickerButton.addEventListener("click", openMonthPicker);
 document.querySelector("#monthPickerClose").addEventListener("click", closeMonthPicker);
@@ -2711,9 +2694,15 @@ document.addEventListener("keydown", event => {
   if (event.key === "Escape" && !elements.monthPickerModal.hidden) closeMonthPicker();
   if (event.key === "Escape" && !elements.dateSheetBackdrop.hidden) closeDateSheet();
 });
-window.addEventListener("pagehide", saveState);
+window.addEventListener("pagehide", () => {
+  flushDateAutosave({ refreshSheet: false, silent: true });
+  saveState();
+});
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "hidden") saveState();
+  if (document.visibilityState === "hidden") {
+    flushDateAutosave({ refreshSheet: false, silent: true });
+    saveState();
+  }
 });
 
 try {
@@ -2723,3 +2712,15 @@ try {
   console.error("Custom Calendar boot failed", error);
   elements.bootError.hidden = false;
 }
+
+
+// Public lifecycle hooks used by the local PWA controller.
+window.CustomCalendarApp = Object.freeze({
+  version: "1.0.0",
+  flush() {
+    return flushDateAutosave({ refreshSheet: false, silent: true }) && saveState();
+  },
+  showToast(message) {
+    showToast(String(message || ""));
+  }
+});

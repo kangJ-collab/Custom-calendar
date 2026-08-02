@@ -4,9 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" id="themeColorMeta" content="#f5f6f8">
-  <title>Custom Calendar — Stage 8</title>
+  <meta name="description" content="일반 일정, 교대근무, 업무 기록, 루틴을 내 방식으로 구성하는 오프라인 우선 커스텀 달력">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Custom Calendar">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <title>Custom Calendar v1.0.0</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/static/woff2/SUIT.css">
-  <link rel="stylesheet" href="./css/app.css?v=stage8-encodingfix">
+  <link rel="stylesheet" href="./css/app.css?v=1.0.0">
 </head>
 <body>
   <div id="app" class="app-shell">
@@ -15,9 +21,15 @@
         <p class="eyebrow">CUSTOM CALENDAR</p>
         <h1 id="appTitle">나의 달력</h1>
       </div>
+      <div class="header-actions">
+        <div class="runtime-status" id="runtimeStatus" role="status" aria-live="polite">
+          <span class="runtime-status-dot" aria-hidden="true"></span>
+          <span id="runtimeStatusText">온라인</span>
+        </div>
       <button class="icon-button" id="quickActionButton" type="button" aria-label="날짜 상태와 사용자 입력 설정 바로가기">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3M1 14h6M9 8h6m2 8h6"/></svg>
       </button>
+      </div>
     </header>
 
     <main class="main-content">
@@ -94,7 +106,7 @@
         <div class="page-heading">
           <span class="section-label">CUSTOM STUDIO</span>
           <h2 id="settingsHeading">설정</h2>
-          <p>6단계에서는 달력 칸·상세보기·요약 화면의 표시 항목과 용어를 직접 구성합니다.</p>
+          <p>템플릿을 고르고 기록 항목과 화면 구성을 내 방식으로 조정할 수 있습니다.</p>
         </div>
 
         <section class="settings-panel" id="templateSettingsPanel">
@@ -314,16 +326,59 @@
           </div>
         </section>
 
+        <section class="settings-panel" id="installSettingsPanel">
+          <div class="section-head">
+            <div>
+              <span class="section-label">앱</span>
+              <h3>설치와 오프라인</h3>
+            </div>
+          </div>
+          <p class="panel-description" id="installDescription">설치 상태를 확인하고 홈 화면에서 앱처럼 실행할 수 있습니다.</p>
+          <div class="install-status-card">
+            <strong id="installStatusTitle">브라우저에서 실행 중</strong>
+            <p id="installStatusText">이 브라우저에서 설치 가능 여부를 확인하고 있습니다.</p>
+          </div>
+          <div class="data-actions">
+            <button class="primary-action" id="installAppButton" type="button" hidden>앱 설치</button>
+            <button class="secondary-action" id="checkUpdateButton" type="button">업데이트 확인</button>
+          </div>
+        </section>
+
+        <section class="settings-panel">
+          <div class="section-head">
+            <div>
+              <span class="section-label">도움말</span>
+              <h3>처음 사용하는 방법</h3>
+            </div>
+          </div>
+          <details class="help-details">
+            <summary>날짜 기록하기</summary>
+            <p>달력에서 날짜를 누르고 상태, 메모, 기록 항목을 입력하세요. 입력 내용은 자동으로 저장됩니다.</p>
+          </details>
+          <details class="help-details">
+            <summary>템플릿 사용하기</summary>
+            <p>설정의 템플릿에서 미리보기를 확인한 뒤 템플릿을 적용하세요. 기존 날짜 기록은 유지됩니다.</p>
+          </details>
+          <details class="help-details">
+            <summary>계산 결과 만들기</summary>
+            <p>숫자 또는 금액 기록 항목을 만든 뒤 계산 결과에서 두 값을 선택하고 더하기, 곱하기 등의 방식을 고르세요.</p>
+          </details>
+          <details class="help-details">
+            <summary>백업과 복원</summary>
+            <p>데이터 관리에서 JSON 백업을 내려받아 보관하세요. 가져오기는 파일 검증 후 현재 데이터를 교체합니다.</p>
+          </details>
+        </section>
+
         <section class="settings-panel">
           <div class="section-head">
             <div>
               <span class="section-label">데이터</span>
-              <h3>현재 단계 데이터 관리</h3>
+              <h3>백업과 복원</h3>
             </div>
           </div>
           <div class="data-actions">
             <button class="secondary-action" id="exportButton" type="button">JSON 내보내기</button>
-            <button class="danger-action" id="resetButton" type="button">6단계 데이터 초기화</button>
+            <button class="danger-action" id="resetButton" type="button">모든 데이터 초기화</button>
           </div>
         </section>
       </section>
@@ -344,7 +399,17 @@
       </button>
     </nav>
 
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <section class="update-banner" id="updateBanner" role="dialog" aria-labelledby="updateBannerTitle" hidden>
+    <div>
+      <strong id="updateBannerTitle">새 버전을 사용할 수 있습니다.</strong>
+      <p>현재 작업을 저장한 뒤 업데이트할 수 있습니다.</p>
+    </div>
+    <div class="update-banner-actions">
+      <button class="secondary-action" id="updateLaterButton" type="button">나중에</button>
+      <button class="primary-action" id="updateNowButton" type="button">지금 업데이트</button>
+    </div>
+  </section>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </div>
 
   <div class="modal-backdrop" id="editorModal" hidden>
@@ -440,7 +505,9 @@
       </div>
       <div class="sheet-actions">
         <button class="secondary-action" id="clearDateButton" type="button">기록 지우기</button>
-        <button class="primary-action" id="saveDateButton" type="button">저장</button>
+        <button class="date-save-status" id="dateSaveStatus" type="button" data-save-status="saved" disabled aria-live="polite">
+          저장됨
+        </button>
       </div>
     </section>
   </div>
@@ -631,24 +698,14 @@
   </div>
 
   <script>
-    window.__calendarBootError = "";
-    window.addEventListener("error", function(event){
-      window.__calendarBootError = event.message || "스크립트 실행 오류";
-    });
-    window.addEventListener("unhandledrejection", function(event){
-      window.__calendarBootError = String(event.reason && event.reason.message || event.reason || "초기화 오류");
-    });
     setTimeout(function(){
       if(document.documentElement.dataset.appReady !== "true"){
         var error=document.getElementById("bootError");
-        var message=document.getElementById("bootErrorMessage");
-        if(message && window.__calendarBootError){
-          message.textContent = "달력을 시작하지 못했습니다: " + window.__calendarBootError;
-        }
         if(error) error.hidden=false;
       }
-    },6000);
+    },4000);
   </script>
-  <script defer src="./js/app.js?v=stage8-encodingfix"></script>
+  <script type="module" src="./js/app.js?v=1.0.0"></script>
+  <script defer src="./js/pwa.js?v=1.0.0"></script>
 </body>
 </html>

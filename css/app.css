@@ -946,3 +946,131 @@ body[data-radius="round"] {
 @keyframes sheetUp{from{transform:translateY(24px);opacity:.2}to{transform:none;opacity:1}}
 @media(prefers-reduced-motion:reduce){.date-sheet{animation:none}}
 @media(max-width:370px){.record-preset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* Stage 10: date autosave */
+.date-save-status {
+  min-width: 112px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 9px 13px;
+  background: var(--surface-soft);
+  color: var(--text-soft);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: default;
+}
+.date-save-status[data-save-status="saving"] {
+  color: var(--accent);
+}
+.date-save-status[data-save-status="saved"] {
+  color: #4f765c;
+}
+.date-save-status[data-save-status="error"] {
+  border-color: rgba(190, 64, 64, .35);
+  background: #fff2f2;
+  color: #a73e3e;
+  cursor: pointer;
+}
+.date-save-status:disabled {
+  opacity: 1;
+}
+
+
+/* Product release v1.0.0 */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.runtime-status {
+  min-height: 32px;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-soft);
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.runtime-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #5c8b69;
+}
+.runtime-status[data-status="offline"] .runtime-status-dot { background: #a56c42; }
+.runtime-status[data-status="update"] .runtime-status-dot { background: var(--accent); }
+.runtime-status[data-status="error"] .runtime-status-dot { background: #b54444; }
+.runtime-status[data-status="recovery"] .runtime-status-dot { background: #8a61a8; }
+
+.install-status-card {
+  margin: 10px 0 12px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+.install-status-card strong { display:block; font-size:13px; }
+.install-status-card p {
+  margin: 5px 0 0;
+  color: var(--text-soft);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.help-details {
+  margin-top: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.help-details summary {
+  min-height: 44px;
+  padding: 11px 13px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 850;
+}
+.help-details p {
+  margin: 0;
+  padding: 0 13px 13px;
+  color: var(--text-soft);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.update-banner {
+  position: fixed;
+  z-index: 180;
+  left: 50%;
+  bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  width: min(calc(100% - 24px), 440px);
+  transform: translateX(-50%);
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 18px 48px rgba(20, 28, 38, .22);
+}
+.update-banner strong { font-size: 13px; }
+.update-banner p {
+  margin: 5px 0 0;
+  color: var(--text-soft);
+  font-size: 10px;
+}
+.update-banner-actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 11px;
+}
+.update-banner-actions button { flex: 1; min-height: 44px; }
+
+@media (max-width: 380px) {
+  .runtime-status { padding: 6px; }
+  #runtimeStatusText { display:none; }
+}
