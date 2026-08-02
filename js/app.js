@@ -15,11 +15,11 @@ function calculation(id, name, scope, operator, left, right, suffix = "", showOn
 }
 function templateLayout(overrides = {}) {
   return {
-    calendarTitle: "ëì ë¬ë ¥",
+    calendarTitle: "나의 달력",
     quickActionTarget: "templates",
     navOrder: ["calendar", "summary", "settings"],
-    navLabels: { calendar: "ë¬ë ¥", summary: "ìì½", settings: "ì¤ì " },
-    terms: { status: "ë ì§ ìí", memo: "ì¼ì  ë° ë©ëª¨", fields: "ê¸°ë¡ í­ëª©", calculations: "ê³ì° ê²°ê³¼" },
+    navLabels: { calendar: "달력", summary: "요약", settings: "설정" },
+    terms: { status: "날짜 상태", memo: "일정 및 메모", fields: "기록 항목", calculations: "계산 결과" },
     cellItems: [
       { id: "status", visible: true },
       { id: "memo", visible: true },
@@ -48,180 +48,180 @@ function templateLayout(overrides = {}) {
 const TEMPLATES = [
   {
     id: "general", version: TEMPLATE_VERSION, category: "general",
-    name: "ì¼ë° ë¬ë ¥", description: "ì¼ì , ì¤ì íì, ìë£ ì¬ë¶ì ì¥ìë¥¼ ê¸°ë¡íë ê¸°ë³¸ ë¬ë ¥",
+    name: "일반 달력", description: "일정, 중요 표시, 완료 여부와 장소를 기록하는 기본 달력",
     statuses: [
-      { id: "schedule", name: "ì¼ì ", shortName: "ì¼ì ", color: "#365f73" },
-      { id: "important", name: "ì¤ì", shortName: "ì¤ì", color: "#b75d54" },
-      { id: "complete", name: "ìë£", shortName: "ìë£", color: "#62866e" }
+      { id: "schedule", name: "일정", shortName: "일정", color: "#365f73" },
+      { id: "important", name: "중요", shortName: "중요", color: "#b75d54" },
+      { id: "complete", name: "완료", shortName: "완료", color: "#62866e" }
     ],
-    fields: [field("place","ì¥ì","text"), field("startTime","ìì ìê°","time"), field("complete","ìë£","checkbox")],
-    pattern: { enabled:false, name:"ì¼ë° ë¬ë ¥", sequence:[] },
+    fields: [field("place","장소","text"), field("startTime","시작 시간","time"), field("complete","완료","checkbox")],
+    pattern: { enabled:false, name:"일반 달력", sequence:[] },
     calculations: [],
     theme: { background:"#f5f6f8", surface:"#ffffff", accent:"#365f73", text:"#1d2228", radius:"balanced", density:"comfortable" },
-    layout: templateLayout({ calendarTitle:"ëì ë¬ë ¥", terms:{status:"ì¼ì  ì¢ë¥",memo:"ì¼ì  ë° ë©ëª¨",fields:"ì¼ì  ì ë³´",calculations:"ê³ì° ê²°ê³¼"}, cellFieldId:"startTime" })
+    layout: templateLayout({ calendarTitle:"나의 달력", terms:{status:"일정 종류",memo:"일정 및 메모",fields:"일정 정보",calculations:"계산 결과"}, cellFieldId:"startTime" })
   },
   {
     id:"fourTeamTwoShift", version:TEMPLATE_VERSION, category:"shift",
-    name:"4ì¡° 2êµëê·¼ë¬´", description:"ì£¼ê° 2ì¼Â·ì¼ê° 2ì¼Â·í´ë¬´ 4ì¼ì 8ì¼ ë°ë³µ",
+    name:"4조 2교대근무", description:"주간 2일·야간 2일·휴무 4일의 8일 반복",
     statuses:[
-      {id:"day",name:"ì£¼ê°",shortName:"ì£¼",color:"#d8e4f3"},
-      {id:"night",name:"ì¼ê°",shortName:"ì¼",color:"#38435f"},
-      {id:"off",name:"í´ë¬´",shortName:"í´",color:"#dceadf"},
-      {id:"leave",name:"ì°ì°¨",shortName:"ì°",color:"#f4dfc7"}
+      {id:"day",name:"주간",shortName:"주",color:"#d8e4f3"},
+      {id:"night",name:"야간",shortName:"야",color:"#38435f"},
+      {id:"off",name:"휴무",shortName:"휴",color:"#dceadf"},
+      {id:"leave",name:"연차",shortName:"연",color:"#f4dfc7"}
     ],
-    fields:[field("overtime","ì°ì¥ ìê°","number",{unit:"ìê°",min:0,max:24}),field("workMemo","ìë¬´ ë©ëª¨","text")],
-    pattern:{enabled:true,name:"ì£¼ì£¼ì¼ì¼í´í´í´í´",sequence:["day","day","night","night","off","off","off","off"]},
+    fields:[field("overtime","연장 시간","number",{unit:"시간",min:0,max:24}),field("workMemo","업무 메모","text")],
+    pattern:{enabled:true,name:"주주야야휴휴휴휴",sequence:["day","day","night","night","off","off","off","off"]},
     calculations:[
-      calculation("monthOvertime","ì´ë² ë¬ ì°ì¥","month","add",operand("field","overtime"),operand("constant","",0),"ìê°",true,1),
-      calculation("nightCount","ì´ë² ë¬ ì¼ê°","month","add",operand("statusCount","night"),operand("constant","",0),"í",false,0)
+      calculation("monthOvertime","이번 달 연장","month","add",operand("field","overtime"),operand("constant","",0),"시간",true,1),
+      calculation("nightCount","이번 달 야간","month","add",operand("statusCount","night"),operand("constant","",0),"회",false,0)
     ],
     theme:{background:"#eef2f5",surface:"#ffffff",accent:"#405f7b",text:"#19242d",radius:"balanced",density:"compact"},
-    layout:templateLayout({calendarTitle:"êµëê·¼ë¬´ ë¬ë ¥",terms:{status:"ê·¼ë¬´ íí",memo:"ê·¼ë¬´ ë©ëª¨",fields:"ê·¼ë¬´ ìë ¥",calculations:"ê·¼ë¬´ ì§ê³"},cellItems:[{id:"status",visible:true},{id:"memo",visible:false},{id:"field",visible:false},{id:"calculation",visible:false}],cellFieldId:"overtime"})
+    layout:templateLayout({calendarTitle:"교대근무 달력",terms:{status:"근무 형태",memo:"근무 메모",fields:"근무 입력",calculations:"근무 집계"},cellItems:[{id:"status",visible:true},{id:"memo",visible:false},{id:"field",visible:false},{id:"calculation",visible:false}],cellFieldId:"overtime"})
   },
   {
     id:"fourTeamThreeShift", version:TEMPLATE_VERSION, category:"shift",
-    name:"4ì¡° 3êµëê·¼ë¬´", description:"ì£¼ê°Â·ì¤íÂ·ì¼ê°Â·í´ë¬´ë¥¼ ë°ë³µíë 3êµë ìì",
+    name:"4조 3교대근무", description:"주간·오후·야간·휴무를 반복하는 3교대 예시",
     statuses:[
-      {id:"day",name:"ì£¼ê°",shortName:"ì£¼",color:"#dbe8f4"},
-      {id:"evening",name:"ì¤í",shortName:"ì¤",color:"#f1dfad"},
-      {id:"night",name:"ì¼ê°",shortName:"ì¼",color:"#3b4563"},
-      {id:"off",name:"í´ë¬´",shortName:"í´",color:"#dceadf"}
+      {id:"day",name:"주간",shortName:"주",color:"#dbe8f4"},
+      {id:"evening",name:"오후",shortName:"오",color:"#f1dfad"},
+      {id:"night",name:"야간",shortName:"야",color:"#3b4563"},
+      {id:"off",name:"휴무",shortName:"휴",color:"#dceadf"}
     ],
-    fields:[field("overtime","ì°ì¥ ìê°","number",{unit:"ìê°",min:0,max:24}),field("handover","ì¸ìì¸ê³","text")],
-    pattern:{enabled:true,name:"ì£¼ì¤ì¼í´í´",sequence:["day","evening","night","off","off"]},
-    calculations:[calculation("nightCount","ì´ë² ë¬ ì¼ê°","month","add",operand("statusCount","night"),operand("constant","",0),"í",true)],
+    fields:[field("overtime","연장 시간","number",{unit:"시간",min:0,max:24}),field("handover","인수인계","text")],
+    pattern:{enabled:true,name:"주오야휴휴",sequence:["day","evening","night","off","off"]},
+    calculations:[calculation("nightCount","이번 달 야간","month","add",operand("statusCount","night"),operand("constant","",0),"회",true)],
     theme:{background:"#f1f4f7",surface:"#ffffff",accent:"#526985",text:"#1d2530",radius:"balanced",density:"compact"},
-    layout:templateLayout({calendarTitle:"3êµë ë¬ë ¥",terms:{status:"ê·¼ë¬´ íí",memo:"ì¸ìì¸ê³ ë©ëª¨",fields:"ê·¼ë¬´ ìë ¥",calculations:"ê·¼ë¬´ ì§ê³"}})
+    layout:templateLayout({calendarTitle:"3교대 달력",terms:{status:"근무 형태",memo:"인수인계 메모",fields:"근무 입력",calculations:"근무 집계"}})
   },
   {
     id:"sixOnTwoOff", version:TEMPLATE_VERSION, category:"shift",
-    name:"6ê·¼ 2í´", description:"ì£¼ê° 6ì¼Â·í´ë¬´ 2ì¼Â·ì¤í 6ì¼Â·í´ë¬´ 2ì¼Â·ì¼ê° 6ì¼Â·í´ë¬´ 2ì¼ì 24ì¼ ë°ë³µ",
+    name:"6근 2휴", description:"주간 6일·휴무 2일·오후 6일·휴무 2일·야간 6일·휴무 2일의 24일 반복",
     statuses:[
-      {id:"day",name:"ì£¼ê°",shortName:"ì£¼",color:"#d8e4f3"},
-      {id:"evening",name:"ì¤í",shortName:"ì¤",color:"#f1dfad"},
-      {id:"night",name:"ì¼ê°",shortName:"ì¼",color:"#38435f"},
-      {id:"off",name:"í´ë¬´",shortName:"í´",color:"#dceadf"},
-      {id:"leave",name:"ì°ì°¨",shortName:"ì°",color:"#f4dfc7"}
+      {id:"day",name:"주간",shortName:"주",color:"#d8e4f3"},
+      {id:"evening",name:"오후",shortName:"오",color:"#f1dfad"},
+      {id:"night",name:"야간",shortName:"야",color:"#38435f"},
+      {id:"off",name:"휴무",shortName:"휴",color:"#dceadf"},
+      {id:"leave",name:"연차",shortName:"연",color:"#f4dfc7"}
     ],
-    fields:[field("overtime","ì°ì¥ ìê°","number",{unit:"ìê°",min:0,max:24}),field("workMemo","ìë¬´ ê¸°ë¡","text")],
-    pattern:{enabled:true,name:"ì£¼6í´2Â·ì¤6í´2Â·ì¼6í´2",sequence:[
+    fields:[field("overtime","연장 시간","number",{unit:"시간",min:0,max:24}),field("workMemo","업무 기록","text")],
+    pattern:{enabled:true,name:"주6휴2·오6휴2·야6휴2",sequence:[
       "day","day","day","day","day","day","off","off",
       "evening","evening","evening","evening","evening","evening","off","off",
       "night","night","night","night","night","night","off","off"
     ]},
-    calculations:[calculation("monthOvertime","ì´ë² ë¬ ì°ì¥","month","add",operand("field","overtime"),operand("constant","",0),"ìê°",true,1)],
+    calculations:[calculation("monthOvertime","이번 달 연장","month","add",operand("field","overtime"),operand("constant","",0),"시간",true,1)],
     theme:{background:"#eef3f3",surface:"#ffffff",accent:"#426d6d",text:"#1d2929",radius:"balanced",density:"compact"},
-    layout:templateLayout({calendarTitle:"6ê·¼ 2í´ ë¬ë ¥",terms:{status:"ê·¼ë¬´ íí",memo:"ìë¬´ ê¸°ë¡",fields:"ê¸°ë¡ í­ëª©",calculations:"ìê° ì§ê³"},cellFieldId:"overtime"})
+    layout:templateLayout({calendarTitle:"6근 2휴 달력",terms:{status:"근무 형태",memo:"업무 기록",fields:"기록 항목",calculations:"월간 집계"},cellFieldId:"overtime"})
   },
   {
     id:"workLog", version:TEMPLATE_VERSION, category:"work",
-    name:"ìë¬´ ê¸°ë¡ ë¬ë ¥", description:"íì¥Â·ì¬ë¬´Â·ì¸ê·¼ ìíì ìììê°, ìë£ì¨ì ê¸°ë¡",
+    name:"업무 기록 달력", description:"현장·사무·외근 상태와 작업시간, 완료율을 기록",
     statuses:[
-      {id:"office",name:"ì¬ë¬´",shortName:"ì¬ë¬´",color:"#6683a8"},
-      {id:"site",name:"íì¥",shortName:"íì¥",color:"#9a7653"},
-      {id:"outside",name:"ì¸ê·¼",shortName:"ì¸ê·¼",color:"#658b72"},
-      {id:"off",name:"í´ë¬´",shortName:"í´",color:"#d6dfda"}
+      {id:"office",name:"사무",shortName:"사무",color:"#6683a8"},
+      {id:"site",name:"현장",shortName:"현장",color:"#9a7653"},
+      {id:"outside",name:"외근",shortName:"외근",color:"#658b72"},
+      {id:"off",name:"휴무",shortName:"휴",color:"#d6dfda"}
     ],
-    fields:[field("project","íë¡ì í¸","select",{options:["A íë¡ì í¸","B íë¡ì í¸","ê¸°í"]}),field("hours","ìì ìê°","number",{unit:"ìê°",min:0,max:24}),field("progress","ìë£ì¨","number",{unit:"%",min:0,max:100})],
-    pattern:{enabled:false,name:"ìë¬´ ê¸°ë¡",sequence:[]},
-    calculations:[calculation("monthHours","ì´ë² ë¬ ìììê°","month","add",operand("field","hours"),operand("constant","",0),"ìê°",true,1)],
+    fields:[field("project","프로젝트","select",{options:["A 프로젝트","B 프로젝트","기타"]}),field("hours","작업 시간","number",{unit:"시간",min:0,max:24}),field("progress","완료율","number",{unit:"%",min:0,max:100})],
+    pattern:{enabled:false,name:"업무 기록",sequence:[]},
+    calculations:[calculation("monthHours","이번 달 작업시간","month","add",operand("field","hours"),operand("constant","",0),"시간",true,1)],
     theme:{background:"#f4f2ee",surface:"#fffdfa",accent:"#766247",text:"#2a251f",radius:"balanced",density:"comfortable"},
-    layout:templateLayout({calendarTitle:"ìë¬´ ë¬ë ¥",terms:{status:"ìë¬´ ì í",memo:"ìë¬´ ë©ëª¨",fields:"ìë¬´ ìë ¥",calculations:"ìë¬´ ì§ê³"},cellFieldId:"project"})
+    layout:templateLayout({calendarTitle:"업무 달력",terms:{status:"업무 유형",memo:"업무 메모",fields:"업무 입력",calculations:"업무 집계"},cellFieldId:"project"})
   },
   {
     id:"routine", version:TEMPLATE_VERSION, category:"life",
-    name:"ë£¨í´ ë¬ë ¥", description:"ì´ëÂ·ê³µë¶Â·í´ì ë£¨í´ê³¼ ì¤í ìê°ì ê´ë¦¬",
+    name:"루틴 달력", description:"운동·공부·휴식 루틴과 실행 시간을 관리",
     statuses:[
-      {id:"exercise",name:"ì´ë",shortName:"ì´ë",color:"#6f8f7a"},
-      {id:"study",name:"ê³µë¶",shortName:"ê³µë¶",color:"#647ba6"},
-      {id:"rest",name:"í´ì",shortName:"í´ì",color:"#b58a63"}
+      {id:"exercise",name:"운동",shortName:"운동",color:"#6f8f7a"},
+      {id:"study",name:"공부",shortName:"공부",color:"#647ba6"},
+      {id:"rest",name:"휴식",shortName:"휴식",color:"#b58a63"}
     ],
-    fields:[field("minutes","ì¤í ìê°","number",{unit:"ë¶",min:0,max:1440}),field("done","ìë£","checkbox")],
-    pattern:{enabled:true,name:"ì´ëÂ·ê³µë¶Â·í´ì",sequence:["exercise","study","exercise","study","exercise","rest","rest"]},
-    calculations:[calculation("monthMinutes","ì´ë² ë¬ ì¤í ìê°","month","add",operand("field","minutes"),operand("constant","",0),"ë¶",true)],
+    fields:[field("minutes","실행 시간","number",{unit:"분",min:0,max:1440}),field("done","완료","checkbox")],
+    pattern:{enabled:true,name:"운동·공부·휴식",sequence:["exercise","study","exercise","study","exercise","rest","rest"]},
+    calculations:[calculation("monthMinutes","이번 달 실행 시간","month","add",operand("field","minutes"),operand("constant","",0),"분",true)],
     theme:{background:"#f3f2ec",surface:"#fffef8",accent:"#6f8063",text:"#252820",radius:"round",density:"comfortable"},
-    layout:templateLayout({calendarTitle:"ë£¨í´ ë¬ë ¥",terms:{status:"ì¤ëì ë£¨í´",memo:"ë£¨í´ ë©ëª¨",fields:"ì¤í ê¸°ë¡",calculations:"ë£¨í´ ì§ê³"},cellFieldId:"minutes"})
+    layout:templateLayout({calendarTitle:"루틴 달력",terms:{status:"오늘의 루틴",memo:"루틴 메모",fields:"실행 기록",calculations:"루틴 집계"},cellFieldId:"minutes"})
   },
   {
     id:"freelancer", version:TEMPLATE_VERSION, category:"work",
-    name:"íë¦¬ëì ë¬ë ¥", description:"ìë¬´ ì í, ìììê°, ìê°ë¹ ê¸ì¡ê³¼ ìì ìì ê´ë¦¬",
+    name:"프리랜서 달력", description:"업무 유형, 작업시간, 시간당 금액과 예상 수입 관리",
     statuses:[
-      {id:"work",name:"ìì",shortName:"ìì",color:"#365f73"},
-      {id:"meeting",name:"ë¯¸í",shortName:"ë¯¸í",color:"#7762a8"},
-      {id:"off",name:"í´ì",shortName:"í´ì",color:"#7f9a84"}
+      {id:"work",name:"작업",shortName:"작업",color:"#365f73"},
+      {id:"meeting",name:"미팅",shortName:"미팅",color:"#7762a8"},
+      {id:"off",name:"휴식",shortName:"휴식",color:"#7f9a84"}
     ],
-    fields:[field("hours","ìì ìê°","number",{unit:"ìê°",min:0,max:24}),field("hourlyRate","ìê°ë¹ ê¸ì¡","currency",{unit:"ì",min:0}),field("client","ìë¢°ì¸","text")],
-    pattern:{enabled:false,name:"íë¦¬ëì",sequence:[]},
+    fields:[field("hours","작업 시간","number",{unit:"시간",min:0,max:24}),field("hourlyRate","시간당 금액","currency",{unit:"원",min:0}),field("client","의뢰인","text")],
+    pattern:{enabled:false,name:"프리랜서",sequence:[]},
     calculations:[
-      calculation("dayIncome","ì¤ë ìì ìì","date","multiply",operand("field","hours"),operand("field","hourlyRate"),"ì",true),
-      calculation("monthHours","ì´ë² ë¬ ìì ìê°","month","add",operand("field","hours"),operand("constant","",0),"ìê°",false,1)
+      calculation("dayIncome","오늘 예상 수입","date","multiply",operand("field","hours"),operand("field","hourlyRate"),"원",true),
+      calculation("monthHours","이번 달 작업 시간","month","add",operand("field","hours"),operand("constant","",0),"시간",false,1)
     ],
     theme:{background:"#f4f1f7",surface:"#ffffff",accent:"#705b8d",text:"#211d27",radius:"balanced",density:"comfortable"},
-    layout:templateLayout({calendarTitle:"íë¦¬ëì ë¬ë ¥",terms:{status:"ìë¬´ ì í",memo:"ìë¬´ ë©ëª¨",fields:"ì ì° ìë ¥",calculations:"ìì ê³ì°"},cellFieldId:"client",cellCalculationId:"dayIncome",cellItems:[{id:"status",visible:true},{id:"memo",visible:false},{id:"field",visible:true},{id:"calculation",visible:true}]})
+    layout:templateLayout({calendarTitle:"프리랜서 달력",terms:{status:"업무 유형",memo:"업무 메모",fields:"정산 입력",calculations:"수입 계산"},cellFieldId:"client",cellCalculationId:"dayIncome",cellItems:[{id:"status",visible:true},{id:"memo",visible:false},{id:"field",visible:true},{id:"calculation",visible:true}]})
   },
   {
     id:"rider", version:TEMPLATE_VERSION, category:"work",
-    name:"ë¼ì´ë ë¬ë ¥", description:"ì´í ìí, ì´íìê°, ê±´ì, ë§¤ì¶ê³¼ ë¹ì©ì ê¸°ë¡",
+    name:"라이더 달력", description:"운행 상태, 운행시간, 건수, 매출과 비용을 기록",
     statuses:[
-      {id:"delivery",name:"ë°°ë¬",shortName:"ë°°ë¬",color:"#d9784a"},
-      {id:"rain",name:"ì°ì² ì´í",shortName:"ì°ì²",color:"#527a9c"},
-      {id:"off",name:"í´ë¬´",shortName:"í´",color:"#78917c"}
+      {id:"delivery",name:"배달",shortName:"배달",color:"#d9784a"},
+      {id:"rain",name:"우천 운행",shortName:"우천",color:"#527a9c"},
+      {id:"off",name:"휴무",shortName:"휴",color:"#78917c"}
     ],
-    fields:[field("hours","ì´í ìê°","number",{unit:"ìê°",min:0,max:24}),field("orders","ìë£ ê±´ì","number",{unit:"ê±´",min:0}),field("sales","ë§¤ì¶","currency",{unit:"ì",min:0}),field("expense","ë¹ì©","currency",{unit:"ì",min:0})],
-    pattern:{enabled:false,name:"ë¼ì´ë",sequence:[]},
+    fields:[field("hours","운행 시간","number",{unit:"시간",min:0,max:24}),field("orders","완료 건수","number",{unit:"건",min:0}),field("sales","매출","currency",{unit:"원",min:0}),field("expense","비용","currency",{unit:"원",min:0})],
+    pattern:{enabled:false,name:"라이더",sequence:[]},
     calculations:[
-      calculation("netIncome","ìììµ","date","subtract",operand("field","sales"),operand("field","expense"),"ì",true),
-      calculation("monthOrders","ì´ë² ë¬ ìë£ ê±´ì","month","add",operand("field","orders"),operand("constant","",0),"ê±´",false)
+      calculation("netIncome","순수익","date","subtract",operand("field","sales"),operand("field","expense"),"원",true),
+      calculation("monthOrders","이번 달 완료 건수","month","add",operand("field","orders"),operand("constant","",0),"건",false)
     ],
     theme:{background:"#f7f2ec",surface:"#fffdf9",accent:"#c3663d",text:"#2d231e",radius:"round",density:"comfortable"},
-    layout:templateLayout({calendarTitle:"ë¼ì´ë ë¬ë ¥",terms:{status:"ì´í ìí",memo:"ì´í ë©ëª¨",fields:"ì´í ìë ¥",calculations:"ì ì° ê²°ê³¼"},cellFieldId:"orders",cellCalculationId:"netIncome",cellItems:[{id:"status",visible:true},{id:"memo",visible:false},{id:"field",visible:true},{id:"calculation",visible:true}]})
+    layout:templateLayout({calendarTitle:"라이더 달력",terms:{status:"운행 상태",memo:"운행 메모",fields:"운행 입력",calculations:"정산 결과"},cellFieldId:"orders",cellCalculationId:"netIncome",cellItems:[{id:"status",visible:true},{id:"memo",visible:false},{id:"field",visible:true},{id:"calculation",visible:true}]})
   },
   {
     id:"family", version:TEMPLATE_VERSION, category:"life",
-    name:"ê°ì¡± ë¬ë ¥", description:"ê°ì¡± êµ¬ì±ìë³ ì¼ì , ì¥ìì ì¤ë¹ë¬¼ì í ë¬ì ëª¨ìë³´ê¸°",
+    name:"가족 달력", description:"가족 구성원별 일정, 장소와 준비물을 한 달에 모아보기",
     statuses:[
-      {id:"family",name:"ê°ì¡± ì¼ì ",shortName:"ê°ì¡±",color:"#b77855"},
-      {id:"child",name:"ìì´ ì¼ì ",shortName:"ìì´",color:"#ce8794"},
-      {id:"couple",name:"ë¶ë¶ ì¼ì ",shortName:"ë¶ë¶",color:"#8171a4"},
-      {id:"school",name:"íêµ",shortName:"íêµ",color:"#6286a6"}
+      {id:"family",name:"가족 일정",shortName:"가족",color:"#b77855"},
+      {id:"child",name:"아이 일정",shortName:"아이",color:"#ce8794"},
+      {id:"couple",name:"부부 일정",shortName:"부부",color:"#8171a4"},
+      {id:"school",name:"학교",shortName:"학교",color:"#6286a6"}
     ],
-    fields:[field("person","ëì","select",{options:["ê°ì¡± ì ì²´","ë¶ëª¨","ìì´"]}),field("place","ì¥ì","text"),field("ready","ì¤ë¹ ìë£","checkbox")],
-    pattern:{enabled:false,name:"ê°ì¡± ë¬ë ¥",sequence:[]},
+    fields:[field("person","대상","select",{options:["가족 전체","부모","아이"]}),field("place","장소","text"),field("ready","준비 완료","checkbox")],
+    pattern:{enabled:false,name:"가족 달력",sequence:[]},
     calculations:[],
     theme:{background:"#f8f2f1",surface:"#ffffff",accent:"#a86466",text:"#2d2324",radius:"round",density:"comfortable"},
-    layout:templateLayout({calendarTitle:"ì°ë¦¬ ê°ì¡± ë¬ë ¥",terms:{status:"ì¼ì  ì¢ë¥",memo:"ê°ì¡± ë©ëª¨",fields:"ì¼ì  ì ë³´",calculations:"ì§ê³"},cellFieldId:"person"})
+    layout:templateLayout({calendarTitle:"우리 가족 달력",terms:{status:"일정 종류",memo:"가족 메모",fields:"일정 정보",calculations:"집계"},cellFieldId:"person"})
   },
   {
     id:"nurse", version:TEMPLATE_VERSION, category:"shift",
-    name:"ê°í¸ì¬ ë¬ë ¥", description:"ë°ë³µ í¨í´ ìì´ ë ì§ë§ë¤ DayÂ·EveningÂ·NightÂ·Offë¥¼ ì§ì  ì§ì ",
+    name:"간호사 달력", description:"반복 패턴 없이 날짜마다 Day·Evening·Night·Off를 직접 지정",
     statuses:[
       {id:"day",name:"Day",shortName:"D",color:"#dbe8f4"},
       {id:"evening",name:"Evening",shortName:"E",color:"#f1dfad"},
       {id:"night",name:"Night",shortName:"N",color:"#3b4563"},
       {id:"off",name:"Off",shortName:"O",color:"#dceadf"},
-      {id:"leave",name:"ì°ì°¨",shortName:"ì°",color:"#f4dfc7"}
+      {id:"leave",name:"연차",shortName:"연",color:"#f4dfc7"}
     ],
-    fields:[field("ward","ê·¼ë¬´ ë³ë","text"),field("overtime","ì°ì¥ ìê°","number",{unit:"ìê°",min:0,max:24}),field("handover","ì¸ê³ ë©ëª¨","text")],
-    pattern:{enabled:false,name:"ì§ì  ê·¼ë¬´í",sequence:[]},
+    fields:[field("ward","근무 병동","text"),field("overtime","연장 시간","number",{unit:"시간",min:0,max:24}),field("handover","인계 메모","text")],
+    pattern:{enabled:false,name:"직접 근무표",sequence:[]},
     calculations:[
-      calculation("nightCount","ì´ë² ë¬ Night","month","add",operand("statusCount","night"),operand("constant","",0),"í",true),
-      calculation("monthOvertime","ì´ë² ë¬ ì°ì¥","month","add",operand("field","overtime"),operand("constant","",0),"ìê°",false,1)
+      calculation("nightCount","이번 달 Night","month","add",operand("statusCount","night"),operand("constant","",0),"회",true),
+      calculation("monthOvertime","이번 달 연장","month","add",operand("field","overtime"),operand("constant","",0),"시간",false,1)
     ],
     theme:{background:"#eef4f6",surface:"#ffffff",accent:"#4e7684",text:"#1d292e",radius:"balanced",density:"compact"},
-    layout:templateLayout({calendarTitle:"ê°í¸ì¬ ê·¼ë¬´í",terms:{status:"ê·¼ë¬´ ì½ë",memo:"ì¸ê³ ë©ëª¨",fields:"ê·¼ë¬´ ì ë³´",calculations:"ê·¼ë¬´ ì§ê³"},cellFieldId:"ward"})
+    layout:templateLayout({calendarTitle:"간호사 근무표",terms:{status:"근무 코드",memo:"인계 메모",fields:"근무 정보",calculations:"근무 집계"},cellFieldId:"ward"})
   },
   {
     id:"direct", version:TEMPLATE_VERSION, category:"general",
-    name:"ì§ì  êµ¬ì±", description:"ìµì ìíì ë¹ ê¸°ë¡ í­ëª©Â·í¨í´Â·ê³ì° ê²°ê³¼ì¼ë¡ ì²ìë¶í° êµ¬ì±",
+    name:"직접 구성", description:"최소 상태와 빈 기록 항목·패턴·계산 결과으로 처음부터 구성",
     statuses:[
-      {id:"typeA",name:"ìí A",shortName:"A",color:"#6683a8"},
-      {id:"typeB",name:"ìí B",shortName:"B",color:"#78917c"}
+      {id:"typeA",name:"상태 A",shortName:"A",color:"#6683a8"},
+      {id:"typeB",name:"상태 B",shortName:"B",color:"#78917c"}
     ],
     fields:[],
-    pattern:{enabled:false,name:"ì§ì  êµ¬ì±",sequence:[]},
+    pattern:{enabled:false,name:"직접 구성",sequence:[]},
     calculations:[],
     theme:{background:"#f5f6f8",surface:"#ffffff",accent:"#365f73",text:"#1d2228",radius:"balanced",density:"comfortable"},
-    layout:templateLayout({calendarTitle:"ëì ë¬ë ¥"})
+    layout:templateLayout({calendarTitle:"나의 달력"})
   }
 ];
 
@@ -234,27 +234,27 @@ const THEME_PRESETS = [
   { id: "night", name: "Deep Night", background: "#171b21", surface: "#222832", accent: "#7f9cc5", text: "#f1f4f8", radius: "balanced", density: "comfortable" }
 ];
 
-const NAV_LABELS = { calendar: "ë¬ë ¥", summary: "ìì½", settings: "ì¤ì " };
-const TEMPLATE_CATEGORY_LABELS = { general:"ì¼ë°", shift:"êµëê·¼ë¬´", work:"ìë¬´Â·ìì", life:"ìíÂ·ê°ì¡±", custom:"ë´ ííë¦¿" };
+const NAV_LABELS = { calendar: "달력", summary: "요약", settings: "설정" };
+const TEMPLATE_CATEGORY_LABELS = { general:"일반", shift:"교대근무", work:"업무·수입", life:"생활·가족", custom:"내 템플릿" };
 const CELL_ITEM_CATALOG = {
-  status: { label: "ë ì§ ìí", description: "ìí ì½ì¹­ ëë ë°ë³µ í¨í´ ìí" },
-  memo: { label: "ë©ëª¨", description: "ë©ëª¨ ì²« ì¤" },
-  field: { label: "ê¸°ë¡ í­ëª©", description: "ì íí ê¸°ë¡ í­ëª© ê°" },
-  calculation: { label: "ê³ì° ê²°ê³¼", description: "ì íí ë ì§ ê³ì° ê²°ê³¼ ê²°ê³¼" }
+  status: { label: "날짜 상태", description: "상태 약칭 또는 반복 패턴 상태" },
+  memo: { label: "메모", description: "메모 첫 줄" },
+  field: { label: "기록 항목", description: "선택한 기록 항목 값" },
+  calculation: { label: "계산 결과", description: "선택한 날짜 계산 결과 결과" }
 };
 const DETAIL_ITEM_CATALOG = {
-  status: { label: "ë ì§ ìí" },
-  memo: { label: "ì¼ì  ë° ë©ëª¨" },
-  fields: { label: "ê¸°ë¡ í­ëª©" },
-  calculations: { label: "ê³ì° ê²°ê³¼" }
+  status: { label: "날짜 상태" },
+  memo: { label: "일정 및 메모" },
+  fields: { label: "기록 항목" },
+  calculations: { label: "계산 결과" }
 };
 const SUMMARY_ITEM_CATALOG = {
-  daysInMonth: { label: "ì´ë² ë¬ ë ì§" },
-  savedDays: { label: "ì ì¥í ë ì§" },
-  statusDays: { label: "ìíê° ìë ë " },
-  memoDays: { label: "ë©ëª¨ê° ìë ë " },
-  filledFields: { label: "ìë ¥ë ì¬ì©ì ê°" },
-  fieldCount: { label: "ê¸°ë¡ í­ëª©" }
+  daysInMonth: { label: "이번 달 날짜" },
+  savedDays: { label: "저장한 날짜" },
+  statusDays: { label: "상태가 있는 날" },
+  memoDays: { label: "메모가 있는 날" },
+  filledFields: { label: "입력된 사용자 값" },
+  fieldCount: { label: "기록 항목" }
 };
 const QUICK_ACTION_PANEL = {
   templates: "templateSettingsPanel",
@@ -274,19 +274,19 @@ function createDefaultState() {
     activeView: "calendar",
     detailOpen: false,
     statuses: [
-      { id: "work", name: "ìë¬´", shortName: "ìë¬´", color: "#365f73" },
-      { id: "off", name: "í´ì", shortName: "í´ì", color: "#6f8f7a" },
-      { id: "family", name: "ê°ì¡±", shortName: "ê°ì¡±", color: "#b77855" },
-      { id: "routine", name: "ë£¨í´", shortName: "ë£¨í´", color: "#7762a8" }
+      { id: "work", name: "업무", shortName: "업무", color: "#365f73" },
+      { id: "off", name: "휴식", shortName: "휴식", color: "#6f8f7a" },
+      { id: "family", name: "가족", shortName: "가족", color: "#b77855" },
+      { id: "routine", name: "루틴", shortName: "루틴", color: "#7762a8" }
     ],
     fields: [
-      { id: "hours", name: "ìê°", type: "number", options: [], unit: "ìê°", required: false, defaultValue: "", min: 0, max: 24 },
-      { id: "place", name: "ì¥ì", type: "text", options: [], unit: "", required: false, defaultValue: "", min: null, max: null },
-      { id: "complete", name: "ìë£", type: "checkbox", options: [], unit: "", required: false, defaultValue: false, min: null, max: null }
+      { id: "hours", name: "시간", type: "number", options: [], unit: "시간", required: false, defaultValue: "", min: 0, max: 24 },
+      { id: "place", name: "장소", type: "text", options: [], unit: "", required: false, defaultValue: "", min: null, max: null },
+      { id: "complete", name: "완료", type: "checkbox", options: [], unit: "", required: false, defaultValue: false, min: null, max: null }
     ],
     pattern: {
       enabled: false,
-      name: "ê¸°ë³¸ í¨í´",
+      name: "기본 패턴",
       anchorDate: localISO(now),
       sequence: []
     },
@@ -301,11 +301,11 @@ function createDefaultState() {
       density: "comfortable"
     },
     layout: {
-      calendarTitle: "ëì ë¬ë ¥",
+      calendarTitle: "나의 달력",
       quickActionTarget: "statuses",
       navOrder: ["calendar", "summary", "settings"],
-      navLabels: { calendar: "ë¬ë ¥", summary: "ìì½", settings: "ì¤ì " },
-      terms: { status: "ë ì§ ìí", memo: "ì¼ì  ë° ë©ëª¨", fields: "ê¸°ë¡ í­ëª©", calculations: "ê³ì° ê²°ê³¼" },
+      navLabels: { calendar: "달력", summary: "요약", settings: "설정" },
+      terms: { status: "날짜 상태", memo: "일정 및 메모", fields: "기록 항목", calculations: "계산 결과" },
       cellItems: [
         { id: "status", visible: true },
         { id: "memo", visible: true },
@@ -351,7 +351,7 @@ function withSubjectParticle(value) {
   if (!text) return "";
   const code = text.charCodeAt(text.length - 1);
   const hasBatchim = code >= 0xAC00 && code <= 0xD7A3 && ((code - 0xAC00) % 28 !== 0);
-  return `${text}${hasBatchim ? "ì´" : "ê°"}`;
+  return `${text}${hasBatchim ? "이" : "가"}`;
 }
 function safeId(value, fallback) {
   const cleaned = String(value || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 40);
@@ -370,7 +370,7 @@ function sanitizeField(item, index) {
   if (min !== null && max !== null && min > max) [min, max] = [max, min];
   return {
     id: safeId(item?.id, `field${index + 1}`),
-    name: String(item?.name || `í­ëª© ${index + 1}`).slice(0, 20),
+    name: String(item?.name || `항목 ${index + 1}`).slice(0, 20),
     type,
     options,
     unit: String(item?.unit || "").slice(0, 10),
@@ -413,7 +413,7 @@ function sanitizeCalculation(item, index) {
   const right = sanitizeOperand(item?.right || { type: "constant", constant: 0 });
   return {
     id: safeId(item?.id, `calc${index + 1}`),
-    name: String(item?.name || `ê³ì° ${index + 1}`).slice(0, 30),
+    name: String(item?.name || `계산 ${index + 1}`).slice(0, 30),
     scope: item?.scope === "month" ? "month" : "date",
     operator: ["add","subtract","multiply","divide","min","max"].includes(item?.operator) ? item.operator : "add",
     left,
@@ -440,8 +440,8 @@ function sanitizeState(raw) {
   if (!raw || typeof raw !== "object") return fallback;
   const statuses = Array.isArray(raw.statuses) ? raw.statuses.slice(0, MAX_STATUSES).map((item, index) => ({
     id: safeId(item?.id, `status${index + 1}`),
-    name: String(item?.name || `ìí ${index + 1}`).slice(0, 20),
-    shortName: String(item?.shortName || item?.name || `ìí${index + 1}`).slice(0, 4),
+    name: String(item?.name || `상태 ${index + 1}`).slice(0, 20),
+    shortName: String(item?.shortName || item?.name || `상태${index + 1}`).slice(0, 4),
     color: safeColor(item?.color)
   })) : fallback.statuses;
   const uniqueStatuses = [];
@@ -481,7 +481,7 @@ function sanitizeState(raw) {
   const rawPattern = raw.pattern && typeof raw.pattern === "object" ? raw.pattern : fallback.pattern;
   const pattern = {
     enabled: rawPattern.enabled === true,
-    name: String(rawPattern.name || "ê¸°ë³¸ í¨í´").slice(0, 30),
+    name: String(rawPattern.name || "기본 패턴").slice(0, 30),
     anchorDate: /^\d{4}-\d{2}-\d{2}$/.test(rawPattern.anchorDate) ? rawPattern.anchorDate : fallback.pattern.anchorDate,
     sequence: Array.isArray(rawPattern.sequence)
       ? rawPattern.sequence.filter(id => statusIds.has(id)).slice(0, 31)
@@ -583,8 +583,8 @@ function sanitizeTemplate(template, fallbackId = "custom") {
   const statuses = Array.isArray(safeTemplate.statuses)
     ? safeTemplate.statuses.slice(0, MAX_STATUSES).map((item, index) => ({
         id: safeId(item?.id, `status${index + 1}`),
-        name: String(item?.name || `ìí ${index + 1}`).slice(0, 20),
-        shortName: String(item?.shortName || item?.name || "ìí").slice(0, 4),
+        name: String(item?.name || `상태 ${index + 1}`).slice(0, 20),
+        shortName: String(item?.shortName || item?.name || "상태").slice(0, 4),
         color: safeColor(item?.color)
       }))
     : fallback.statuses.map(item => ({ ...item }));
@@ -596,7 +596,7 @@ function sanitizeTemplate(template, fallbackId = "custom") {
   const rawPattern = safeTemplate.pattern && typeof safeTemplate.pattern === "object" ? safeTemplate.pattern : {};
   const pattern = {
     enabled: rawPattern.enabled === true,
-    name: String(rawPattern.name || "ì¬ì©ì í¨í´").slice(0, 30),
+    name: String(rawPattern.name || "사용자 패턴").slice(0, 30),
     anchorDate: /^\d{4}-\d{2}-\d{2}$/.test(rawPattern.anchorDate) ? rawPattern.anchorDate : localISO(new Date()),
     sequence: Array.isArray(rawPattern.sequence) ? rawPattern.sequence.filter(id => statusIds.has(id)).slice(0, 31) : []
   };
@@ -608,8 +608,8 @@ function sanitizeTemplate(template, fallbackId = "custom") {
     id: safeId(safeTemplate.id, fallbackId),
     version: Number.isInteger(Number(safeTemplate.version)) ? Math.max(1, Math.min(999, Number(safeTemplate.version))) : 1,
     category: "custom",
-    name: String(safeTemplate.name || "ì¬ì©ì ííë¦¿").slice(0, 30),
-    description: String(safeTemplate.description || "ì¬ì©ìê° ì ì¥í êµ¬ì±").slice(0, 80),
+    name: String(safeTemplate.name || "사용자 템플릿").slice(0, 30),
+    description: String(safeTemplate.description || "사용자가 저장한 구성").slice(0, 80),
     custom: true,
     statuses,
     fields,
@@ -629,14 +629,41 @@ function sanitizeTemplate(template, fallbackId = "custom") {
   };
 }
 
+
+function repairMojibakeText(value) {
+  const text = String(value ?? "");
+  if (!/[\u00C3\u00C2\u00F0\u00EB\u00EC\u00ED\u00EA\u00E6\u00EF\u00BF\u00BD]/.test(text)) return text;
+  try {
+    const chars = Array.from(text);
+    if (chars.some(char => char.charCodeAt(0) > 255)) return text;
+    const bytes = Uint8Array.from(chars.map(char => char.charCodeAt(0)));
+    const decoded = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    return /[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(decoded) ? decoded : text;
+  } catch {
+    return text;
+  }
+}
+function repairMojibakeData(value, depth = 0) {
+  if (depth > 12) return value;
+  if (typeof value === "string") return repairMojibakeText(value);
+  if (Array.isArray(value)) return value.map(item => repairMojibakeData(item, depth + 1));
+  if (!value || typeof value !== "object") return value;
+  const repaired = {};
+  for (const [key, item] of Object.entries(value)) {
+    if (["__proto__", "constructor", "prototype"].includes(key)) continue;
+    repaired[key] = repairMojibakeData(item, depth + 1);
+  }
+  return repaired;
+}
+
 function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return sanitizeState(JSON.parse(saved));
+    if (saved) return sanitizeState(repairMojibakeData(JSON.parse(saved)));
     for (const legacyKey of LEGACY_STORAGE_KEYS) {
       const legacy = localStorage.getItem(legacyKey);
       if (!legacy) continue;
-      const migrated = sanitizeState(JSON.parse(legacy));
+      const migrated = sanitizeState(repairMojibakeData(JSON.parse(legacy)));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
       return migrated;
     }
@@ -655,8 +682,8 @@ let layoutDraftDirty = false;
 let previewTemplateId = "";
 
 const holidays = new Map([
-  ["2026-08-15", "ê´ë³µì "],
-  ["2026-08-17", "ëì²´ê³µí´ì¼"]
+  ["2026-08-15", "광복절"],
+  ["2026-08-17", "대체공휴일"]
 ]);
 
 const elements = {
@@ -784,7 +811,7 @@ function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     return true;
   } catch {
-    showToast("ì ì¥ ê³µê°ì íì¸í´ ì£¼ì¸ì.");
+    showToast("저장 공간을 확인해 주세요.");
     return false;
   }
 }
@@ -834,7 +861,7 @@ function renderCalendar() {
   const month = viewDate.getMonth();
   const monthLabel = formatMonth(viewDate);
   elements.calendarHeading.textContent = monthLabel;
-  elements.monthPickerButton.setAttribute("aria-label", `${monthLabel}, ì°ëì ì ì í`);
+  elements.monthPickerButton.setAttribute("aria-label", `${monthLabel}, 연도와 월 선택`);
   elements.calendarGrid.classList.remove("is-loading");
   elements.calendarGrid.replaceChildren();
 
@@ -853,9 +880,9 @@ function renderCalendar() {
     button.setAttribute("role", "gridcell");
     const ariaParts = [formatDetailDate(date)];
     if (holidayName) ariaParts.push(holidayName);
-    if (status) ariaParts.push(`${status.name}${entry.statusId ? ", ì§ì  ì¤ì " : state.pattern.enabled ? ", ë°ë³µ í¨í´" : ""}`);
-    if (entry.memo) ariaParts.push("ë©ëª¨ ìì");
-    if (sameDay(date, today)) ariaParts.push("ì¤ë");
+    if (status) ariaParts.push(`${status.name}${entry.statusId ? ", 직접 설정" : state.pattern.enabled ? ", 반복 패턴" : ""}`);
+    if (entry.memo) ariaParts.push("메모 있음");
+    if (sameDay(date, today)) ariaParts.push("오늘");
     button.setAttribute("aria-label", ariaParts.join(", "));
     button.setAttribute("aria-selected", sameDay(date, selectedDate) ? "true" : "false");
     if (date.getMonth() !== month) button.classList.add("outside");
@@ -885,7 +912,7 @@ function createCalendarCellLine(itemId, context) {
   line.className = `cell-line ${itemId}`;
   if (itemId === "status") {
     if (!status && !holidayName) return null;
-    line.textContent = status?.shortName || "í´ì¼";
+    line.textContent = status?.shortName || "휴일";
     line.style.background = status?.color || "#fff0ef";
     line.style.color = status ? getReadableTextColor(status.color) : "#b63834";
     return line;
@@ -913,7 +940,7 @@ function createCalendarCellLine(itemId, context) {
   return null;
 }
 function formatFieldDisplay(field, value) {
-  if (field.type === "checkbox") return value ? "ìë£" : "";
+  if (field.type === "checkbox") return value ? "완료" : "";
   return `${value}${field.unit ? ` ${field.unit}` : ""}`;
 }
 function getReadableTextColor(hex) {
@@ -940,7 +967,7 @@ function hasUnsavedDateChanges() {
   return JSON.stringify(stored) !== JSON.stringify(current);
 }
 function closeDateSheet(force = false) {
-  if (!force && hasUnsavedDateChanges() && !confirm("ì ì¥íì§ ìì ë ì§ ê¸°ë¡ì´ ììµëë¤. ë«ìê¹ì?")) return;
+  if (!force && hasUnsavedDateChanges() && !confirm("저장하지 않은 날짜 기록이 있습니다. 닫을까요?")) return;
   elements.dateSheetBackdrop.hidden = true;
   document.body.style.overflow = "";
   if (modalLastFocus instanceof HTMLElement) modalLastFocus.focus();
@@ -955,10 +982,10 @@ function renderDetail() {
   const holidayName = holidays.get(iso);
   const isToday = sameDay(selectedDate, new Date());
 
-  elements.dateSheetTitle.textContent = isToday ? `ì¤ë Â· ${formatDetailDate(selectedDate)}` : formatDetailDate(selectedDate);
+  elements.dateSheetTitle.textContent = isToday ? `오늘 · ${formatDetailDate(selectedDate)}` : formatDetailDate(selectedDate);
   elements.detailStatus.textContent = status
-    ? `${status.name}${draftEntry.statusId ? " Â· ì§ì  ì¤ì " : " Â· ë°ë³µ í¨í´"}`
-    : "ìí ìì";
+    ? `${status.name}${draftEntry.statusId ? " · 직접 설정" : " · 반복 패턴"}`
+    : "상태 없음";
   elements.detailStatusSwatch.style.background = status?.color || "#b4bec5";
   elements.detailMemoInput.value = draftEntry.memo;
   applyDetailLayout();
@@ -986,7 +1013,7 @@ function renderStatusChoices() {
   noneButton.type = "button";
   noneButton.className = `status-choice${draftEntry.statusId ? "" : " active"}`;
   noneButton.dataset.statusId = "";
-  noneButton.textContent = state.pattern.enabled ? "ë°ë³µ í¨í´ ì¬ì©" : "ìí ìì";
+  noneButton.textContent = state.pattern.enabled ? "반복 패턴 사용" : "상태 없음";
   elements.statusChoiceGrid.append(noneButton);
   for (const status of state.statuses) {
     const button = document.createElement("button");
@@ -1055,7 +1082,7 @@ function renderCustomFields() {
         input = document.createElement("select");
         const empty = document.createElement("option");
         empty.value = "";
-        empty.textContent = "ì í";
+        empty.textContent = "선택";
         input.append(empty);
         for (const optionText of field.options) {
           const option = document.createElement("option");
@@ -1163,7 +1190,7 @@ function renderHomeCalculations() {
     const card = document.createElement("article");
     card.className = "home-calculation-card";
     const label = document.createElement("span");
-    label.textContent = `${calculation.scope === "month" ? "ì´ë² ë¬" : "ì í ë ì§"} Â· ${calculation.name}`;
+    label.textContent = `${calculation.scope === "month" ? "이번 달" : "선택 날짜"} · ${calculation.name}`;
     const strong = document.createElement("strong");
     strong.textContent = formatCalculationValue(calculation, evaluateCalculation(calculation, calculation.scope));
     card.append(label, strong);
@@ -1192,7 +1219,7 @@ function saveSelectedDate() {
     value = sanitizeFieldValue(field, value);
     const empty = value === "" || value === null || value === undefined;
     if (field.required && empty) {
-      showToast(`${field.name} í­ëª©ì íììëë¤.`);
+      showToast(`${field.name} 항목은 필수입니다.`);
       input.focus();
       return;
     }
@@ -1203,14 +1230,14 @@ function saveSelectedDate() {
   saveState();
   renderCalendar();
   renderSummary();
-  showToast("ì íí ë ì§ë¥¼ ì ì¥íìµëë¤.");
+  showToast("선택한 날짜를 저장했습니다.");
 }
 function clearSelectedDate() {
   delete state.entries[state.selectedDate];
   saveState();
   renderCalendar();
   renderSummary();
-  showToast("ì íí ë ì§ì ìë ¥ì ì§ì ìµëë¤.");
+  showToast("선택한 날짜의 입력을 지웠습니다.");
 }
 
 function renderSummary() {
@@ -1228,12 +1255,12 @@ function renderSummary() {
   }
 
   const summaryValues = {
-    daysInMonth: [SUMMARY_ITEM_CATALOG.daysInMonth.label, `${daysInMonth}ì¼`],
-    savedDays: [SUMMARY_ITEM_CATALOG.savedDays.label, `${monthEntries.length}ì¼`],
-    statusDays: [`${withSubjectParticle(state.layout.terms.status)} ìë ë `, `${statusCount}ì¼`],
-    memoDays: [`${withSubjectParticle(state.layout.terms.memo)} ìë ë `, `${memoCount}ì¼`],
-    filledFields: ["ìë ¥ë ì¬ì©ì ê°", `${filledFields}ê°`],
-    fieldCount: [state.layout.terms.fields, `${state.fields.length}ê°`]
+    daysInMonth: [SUMMARY_ITEM_CATALOG.daysInMonth.label, `${daysInMonth}일`],
+    savedDays: [SUMMARY_ITEM_CATALOG.savedDays.label, `${monthEntries.length}일`],
+    statusDays: [`${withSubjectParticle(state.layout.terms.status)} 있는 날`, `${statusCount}일`],
+    memoDays: [`${withSubjectParticle(state.layout.terms.memo)} 있는 날`, `${memoCount}일`],
+    filledFields: ["입력된 사용자 값", `${filledFields}개`],
+    fieldCount: [state.layout.terms.fields, `${state.fields.length}개`]
   };
   const cards = state.layout.summaryItems.filter(item => item.visible).map(item => summaryValues[item.id]);
   elements.summaryGrid.replaceChildren();
@@ -1264,14 +1291,14 @@ function renderSummary() {
     const name = document.createElement("span");
     name.textContent = status.name;
     const strong = document.createElement("strong");
-    strong.textContent = `${count}ì¼`;
+    strong.textContent = `${count}일`;
     row.append(dot, name, strong);
     elements.statusSummaryList.append(row);
   }
   if (!state.statuses.length) {
     const empty = document.createElement("p");
     empty.className = "empty-copy";
-    empty.textContent = "ë±ë¡ë ë ì§ ìíê° ììµëë¤.";
+    empty.textContent = "등록된 날짜 상태가 없습니다.";
     elements.statusSummaryList.append(empty);
   }
 }
@@ -1307,13 +1334,13 @@ function renderTemplates() {
     description.textContent = template.description;
     const categoryBadge = document.createElement("span");
     categoryBadge.className = "template-card-category";
-    categoryBadge.textContent = TEMPLATE_CATEGORY_LABELS[template.custom ? "custom" : template.category] || "ííë¦¿";
+    categoryBadge.textContent = TEMPLATE_CATEGORY_LABELS[template.custom ? "custom" : template.category] || "템플릿";
     const version = document.createElement("small");
     version.className = "template-card-version";
     version.textContent = `v${template.version || 1}`;
     const actions = document.createElement("div");
     actions.className = "template-card-actions";
-    for (const [action, label] of [["preview","ë¯¸ë¦¬ë³´ê¸°"],["apply","ì ì©"],["duplicate","ë³µì "]]) {
+    for (const [action, label] of [["preview","미리보기"],["apply","적용"],["duplicate","복제"]]) {
       const button = document.createElement("button");
       button.type = "button";
       button.dataset.templateAction = action;
@@ -1324,13 +1351,13 @@ function renderTemplates() {
       const remove = document.createElement("button");
       remove.type = "button";
       remove.dataset.templateAction = "delete";
-      remove.textContent = "ì­ì ";
+      remove.textContent = "삭제";
       actions.append(remove);
     }
     card.append(name, description, categoryBadge, version, actions);
     elements.templateGrid.append(card);
   }
-  if (!templates.length) appendEmpty(elements.templateGrid, "ì¡°ê±´ì ë§ë ííë¦¿ì´ ììµëë¤.");
+  if (!templates.length) appendEmpty(elements.templateGrid, "조건에 맞는 템플릿이 없습니다.");
 }
 function renderPatternEditor() {
   elements.patternEnabled.checked = state.pattern.enabled;
@@ -1364,7 +1391,7 @@ function renderPatternDraft() {
     token.append(order, document.createTextNode(status.shortName));
     elements.patternSequence.append(token);
   });
-  if (!patternDraft.length) appendEmpty(elements.patternSequence, "ìíë¥¼ ëë¬ ë°ë³µ ììë¥¼ ë§ëì¸ì.");
+  if (!patternDraft.length) appendEmpty(elements.patternSequence, "상태를 눌러 반복 순서를 만드세요.");
 }
 function renderCalculationEditor() {
   elements.calculationEditorList.replaceChildren();
@@ -1376,22 +1403,22 @@ function renderCalculationEditor() {
     const strong = document.createElement("strong");
     strong.textContent = calculation.name;
     const small = document.createElement("small");
-    small.textContent = `${calculation.scope === "month" ? "ìê°" : "ë ì§"} Â· ${describeExpression(calculation)}`;
+    small.textContent = `${calculation.scope === "month" ? "월간" : "날짜"} · ${describeExpression(calculation)}`;
     copy.append(strong, small);
     if (calculation.showOnHome) {
       const badge = document.createElement("span");
       badge.className = "source-badge";
-      badge.textContent = "í ì¹´ë";
+      badge.textContent = "홈 카드";
       copy.append(badge);
     }
     const actions = document.createElement("div");
     actions.className = "editor-actions";
     const buttons = [
-      ["up", "â", index === 0],
-      ["down", "â", index === state.calculations.length - 1],
-      ["duplicate", "ë³µì ", false],
-      ["edit", "í¸ì§", false],
-      ["delete", "ì­ì ", false]
+      ["up", "↑", index === 0],
+      ["down", "↓", index === state.calculations.length - 1],
+      ["duplicate", "복제", false],
+      ["edit", "편집", false],
+      ["delete", "삭제", false]
     ];
     for (const [action, text, disabled] of buttons) {
       const button = document.createElement("button");
@@ -1407,15 +1434,15 @@ function renderCalculationEditor() {
     row.append(copy, actions);
     elements.calculationEditorList.append(row);
   });
-  if (!state.calculations.length) appendEmpty(elements.calculationEditorList, "ê³ì° ê²°ê³¼ì´ ììµëë¤.");
+  if (!state.calculations.length) appendEmpty(elements.calculationEditorList, "계산 결과이 없습니다.");
 }
 function operandLabel(operand) {
   if (operand.type === "constant") return String(operand.constant);
-  if (operand.type === "field") return state.fields.find(item => item.id === operand.sourceId)?.name || "ì­ì ë ê¸°ë¡ í­ëª©";
-  return `${state.statuses.find(item => item.id === operand.sourceId)?.name || "ì­ì ë ìí"} íì`;
+  if (operand.type === "field") return state.fields.find(item => item.id === operand.sourceId)?.name || "삭제된 기록 항목";
+  return `${state.statuses.find(item => item.id === operand.sourceId)?.name || "삭제된 상태"} 횟수`;
 }
 function describeExpression(calculation) {
-  const operatorLabels = { add: "+", subtract: "â", multiply: "Ã", divide: "Ã·", min: "min", max: "max" };
+  const operatorLabels = { add: "+", subtract: "−", multiply: "×", divide: "÷", min: "min", max: "max" };
   return `${operandLabel(calculation.left)} ${operatorLabels[calculation.operator]} ${operandLabel(calculation.right)}`;
 }
 
@@ -1505,12 +1532,12 @@ function renderLayoutEditor() {
   elements.termFields.value = layoutDraft.terms.fields;
   elements.termCalculations.value = layoutDraft.terms.calculations;
 
-  populateSelect(elements.cellFieldSelect, state.fields, layoutDraft.cellFieldId, "íìí  ê¸°ë¡ í­ëª© ìì");
+  populateSelect(elements.cellFieldSelect, state.fields, layoutDraft.cellFieldId, "표시할 기록 항목 없음");
   populateSelect(
     elements.cellCalculationSelect,
     state.calculations.filter(item => item.scope === "date"),
     layoutDraft.cellCalculationId,
-    "íìí  ê³ì° ê²°ê³¼ ìì"
+    "표시할 계산 결과 없음"
   );
 
   renderOrderedEditor(elements.cellItemEditor, layoutDraft.cellItems, CELL_ITEM_CATALOG, "cell");
@@ -1527,20 +1554,20 @@ function renderLayoutEditor() {
     labelInput.dataset.navLabel = id;
     labelInput.maxLength = 10;
     labelInput.value = layoutDraft.navLabels[id];
-    labelInput.setAttribute("aria-label", `${NAV_LABELS[id]} ë©ë´ ì´ë¦`);
+    labelInput.setAttribute("aria-label", `${NAV_LABELS[id]} 메뉴 이름`);
     const actions = document.createElement("div");
     actions.className = "nav-order-actions";
     const up = document.createElement("button");
     up.type = "button";
     up.dataset.navMove = "-1";
-    up.setAttribute("aria-label", `${NAV_LABELS[id]} ìë¡ ì´ë`);
-    up.textContent = "â";
+    up.setAttribute("aria-label", `${NAV_LABELS[id]} 위로 이동`);
+    up.textContent = "↑";
     up.disabled = index === 0;
     const down = document.createElement("button");
     down.type = "button";
     down.dataset.navMove = "1";
-    down.setAttribute("aria-label", `${NAV_LABELS[id]} ìëë¡ ì´ë`);
-    down.textContent = "â";
+    down.setAttribute("aria-label", `${NAV_LABELS[id]} 아래로 이동`);
+    down.textContent = "↓";
     down.disabled = index === layoutDraft.navOrder.length - 1;
     actions.append(up, down);
     row.append(labelInput, actions);
@@ -1573,26 +1600,26 @@ function renderOrderedEditor(container, items, catalog, group) {
     const strong = document.createElement("strong");
     strong.textContent = catalog[item.id].label;
     const small = document.createElement("small");
-    small.textContent = catalog[item.id].description || `${index + 1}ë²ì§¸`;
+    small.textContent = catalog[item.id].description || `${index + 1}번째`;
     copy.append(strong, small);
     const actions = document.createElement("div");
     actions.className = "layout-order-actions";
     const up = document.createElement("button");
     up.type = "button";
     up.dataset.layoutMove = "-1";
-    up.textContent = "â";
+    up.textContent = "↑";
     up.disabled = index === 0;
     const down = document.createElement("button");
     down.type = "button";
     down.dataset.layoutMove = "1";
-    down.textContent = "â";
+    down.textContent = "↓";
     down.disabled = index === items.length - 1;
     const toggle = document.createElement("input");
     toggle.type = "checkbox";
     toggle.className = "layout-toggle";
     toggle.dataset.layoutToggle = item.id;
     toggle.checked = item.visible;
-    toggle.setAttribute("aria-label", `${catalog[item.id].label} íì`);
+    toggle.setAttribute("aria-label", `${catalog[item.id].label} 표시`);
     actions.append(up, down, toggle);
     row.append(copy, actions);
     container.append(row);
@@ -1600,14 +1627,14 @@ function renderOrderedEditor(container, items, catalog, group) {
 }
 function updateQuickActionLabel() {
   const labels = {
-    templates: "ííë¦¿ ì¤ì  ë°ë¡ê°ê¸°",
-    pattern: "ë°ë³µ í¨í´ ì¤ì  ë°ë¡ê°ê¸°",
-    calculations: "ê³ì° ê²°ê³¼ ì¤ì  ë°ë¡ê°ê¸°",
-    statuses: "ë ì§ ìí ì¤ì  ë°ë¡ê°ê¸°",
-    fields: "ê¸°ë¡ í­ëª© ì¤ì  ë°ë¡ê°ê¸°",
-    theme: "íë§ ì¤ì  ë°ë¡ê°ê¸°"
+    templates: "템플릿 설정 바로가기",
+    pattern: "반복 패턴 설정 바로가기",
+    calculations: "계산 결과 설정 바로가기",
+    statuses: "날짜 상태 설정 바로가기",
+    fields: "기록 항목 설정 바로가기",
+    theme: "테마 설정 바로가기"
   };
-  document.querySelector("#quickActionButton").setAttribute("aria-label", labels[state.layout.quickActionTarget] || "ì¤ì  ë°ë¡ê°ê¸°");
+  document.querySelector("#quickActionButton").setAttribute("aria-label", labels[state.layout.quickActionTarget] || "설정 바로가기");
 }
 function renderNavigation() {
   const nav = document.querySelector("#bottomNav");
@@ -1621,15 +1648,15 @@ function renderNavigation() {
   }
 }
 function saveLayout() {
-  layoutDraft.calendarTitle = elements.calendarTitleInput.value.trim().slice(0, 30) || "ëì ë¬ë ¥";
+  layoutDraft.calendarTitle = elements.calendarTitleInput.value.trim().slice(0, 30) || "나의 달력";
   layoutDraft.quickActionTarget = Object.hasOwn(QUICK_ACTION_PANEL, elements.quickActionTarget.value)
     ? elements.quickActionTarget.value
     : "statuses";
   layoutDraft.terms = {
-    status: elements.termStatus.value.trim().slice(0, 16) || "ë ì§ ìí",
-    memo: elements.termMemo.value.trim().slice(0, 16) || "ì¼ì  ë° ë©ëª¨",
-    fields: elements.termFields.value.trim().slice(0, 16) || "ê¸°ë¡ í­ëª©",
-    calculations: elements.termCalculations.value.trim().slice(0, 16) || "ê³ì° ê²°ê³¼"
+    status: elements.termStatus.value.trim().slice(0, 16) || "날짜 상태",
+    memo: elements.termMemo.value.trim().slice(0, 16) || "일정 및 메모",
+    fields: elements.termFields.value.trim().slice(0, 16) || "기록 항목",
+    calculations: elements.termCalculations.value.trim().slice(0, 16) || "계산 결과"
   };
   layoutDraft.cellFieldId = state.fields.some(item => item.id === elements.cellFieldSelect.value)
     ? elements.cellFieldSelect.value : "";
@@ -1640,11 +1667,11 @@ function saveLayout() {
     layoutDraft.navLabels[id] = input.value.trim().slice(0, 10) || NAV_LABELS[id];
   });
   if (layoutDraft.detailItems.filter(item => item.visible).length < 1) {
-    showToast("ìì¸ë³´ê¸° í­ëª©ì ìµì 1ê°ê° íìí©ëë¤.");
+    showToast("상세보기 항목은 최소 1개가 필요합니다.");
     return;
   }
   if (layoutDraft.summaryItems.filter(item => item.visible).length < 1) {
-    showToast("ìì½ ì¹´ëë ìµì 1ê°ê° íìí©ëë¤.");
+    showToast("요약 카드는 최소 1개가 필요합니다.");
     return;
   }
   state.layout = structuredClone(layoutDraft);
@@ -1655,7 +1682,7 @@ function saveLayout() {
   renderNavigation();
   renderCalendar();
   renderSummary();
-  showToast("íë©´ êµ¬ì±ì ì ì¥íìµëë¤.");
+  showToast("화면 구성을 저장했습니다.");
 }
 function renderStatusEditor() {
   elements.statusEditorList.replaceChildren();
@@ -1663,27 +1690,27 @@ function renderStatusEditor() {
     const row = createEditorRow({
       color: status.color,
       title: status.name,
-      subtitle: `ë¬ë ¥ íì: ${status.shortName}`,
+      subtitle: `달력 표시: ${status.shortName}`,
       kind: "status",
       id: status.id
     });
     elements.statusEditorList.append(row);
   }
-  if (!state.statuses.length) appendEmpty(elements.statusEditorList, "ë ì§ ìíê° ììµëë¤.");
+  if (!state.statuses.length) appendEmpty(elements.statusEditorList, "날짜 상태가 없습니다.");
 }
 function renderFieldEditor() {
-  const typeLabels = { text: "íì¤í¸", number: "ì«ì", currency: "ê¸ì¡", checkbox: "ì²´í¬", select: "ì í ëª©ë¡", time: "ìê°", date: "ë ì§" };
+  const typeLabels = { text: "텍스트", number: "숫자", currency: "금액", checkbox: "체크", select: "선택 목록", time: "시간", date: "날짜" };
   elements.fieldEditorList.replaceChildren();
   for (const field of state.fields) {
     const row = createEditorRow({
       title: field.name,
-      subtitle: `ìë ¥ íì: ${typeLabels[field.type]}`,
+      subtitle: `입력 형식: ${typeLabels[field.type]}`,
       kind: "field",
       id: field.id
     });
     elements.fieldEditorList.append(row);
   }
-  if (!state.fields.length) appendEmpty(elements.fieldEditorList, "ê¸°ë¡ í­ëª©ì´ ììµëë¤.");
+  if (!state.fields.length) appendEmpty(elements.fieldEditorList, "기록 항목이 없습니다.");
 }
 function createEditorRow({ color, title, subtitle, kind, id }) {
   const row = document.createElement("div");
@@ -1709,14 +1736,14 @@ function createEditorRow({ color, title, subtitle, kind, id }) {
   edit.dataset.action = "edit";
   edit.dataset.kind = kind;
   edit.dataset.id = id;
-  edit.textContent = "í¸ì§";
+  edit.textContent = "편집";
   const remove = document.createElement("button");
   remove.type = "button";
   remove.className = "delete";
   remove.dataset.action = "delete";
   remove.dataset.kind = kind;
   remove.dataset.id = id;
-  remove.textContent = "ì­ì ";
+  remove.textContent = "삭제";
   actions.append(edit, remove);
   row.append(copy, actions);
   return row;
@@ -1795,18 +1822,18 @@ function applyTemplate(templateId) {
     layout: document.querySelector("#applyTemplateLayout").checked
   };
   if (!Object.values(options).some(Boolean)) {
-    showToast("ì ì©í  êµ¬ì±ì íë ì´ì ì íí´ ì£¼ì¸ì.");
+    showToast("적용할 구성을 하나 이상 선택해 주세요.");
     return;
   }
   const selectedNames = [
-    options.statuses && "ìí", options.fields && "ê¸°ë¡ í­ëª©", options.pattern && "í¨í´",
-    options.calculations && "ê³ì° ê²°ê³¼", options.theme && "íë§", options.layout && "íë©´ êµ¬ì±Â·ì©ì´"
+    options.statuses && "상태", options.fields && "기록 항목", options.pattern && "패턴",
+    options.calculations && "계산 결과", options.theme && "테마", options.layout && "화면 구성·용어"
   ].filter(Boolean).join(", ");
   const preview = analyzeTemplateApplication(template, options);
   const warning = preview.excluded
-    ? `\nì°¸ì¡° í­ëª©ì´ ìì´ ì ì¸ë  êµ¬ì±: ${preview.excluded}ê°`
+    ? `\n참조 항목이 없어 제외될 구성: ${preview.excluded}개`
     : "";
-  if (!confirm(`${template.name} ííë¦¿ì ${selectedNames} êµ¬ì±ì ì ì©í ê¹ì?\në ì§ë³ ê¸°ë¡ì ì ì§ë©ëë¤.${warning}`)) return;
+  if (!confirm(`${template.name} 템플릿의 ${selectedNames} 구성을 적용할까요?\n날짜별 기록은 유지됩니다.${warning}`)) return;
 
   if (options.statuses) state.statuses = template.statuses.map(item => ({ ...item }));
   if (options.fields) state.fields = template.fields.map(item => ({ ...item }));
@@ -1831,7 +1858,7 @@ function applyTemplate(templateId) {
   saveState();
   applyTheme(state.theme);
   renderAll();
-  showToast(`${template.name} ííë¦¿ì ì ì©íìµëë¤.`);
+  showToast(`${template.name} 템플릿을 적용했습니다.`);
 }
 
 function repairReferences() {
@@ -1863,12 +1890,12 @@ function repairReferences() {
 }
 function savePattern() {
   if (elements.patternEnabled.checked && !patternDraft.length) {
-    showToast("ë°ë³µ í¨í´ì í í­ëª© ì´ì íìí©ëë¤.");
+    showToast("반복 패턴은 한 항목 이상 필요합니다.");
     return;
   }
   state.pattern = {
     enabled: elements.patternEnabled.checked,
-    name: elements.patternName.value.trim().slice(0, 30) || "ê¸°ë³¸ í¨í´",
+    name: elements.patternName.value.trim().slice(0, 30) || "기본 패턴",
     anchorDate: /^\d{4}-\d{2}-\d{2}$/.test(elements.patternAnchorDate.value)
       ? elements.patternAnchorDate.value
       : state.selectedDate,
@@ -1877,12 +1904,12 @@ function savePattern() {
   saveState();
   renderCalendar();
   renderSummary();
-  showToast("ë°ë³µ í¨í´ì ì ì¥íìµëë¤.");
+  showToast("반복 패턴을 저장했습니다.");
 }
 function openCalculationEditor(id = "") {
   modalLastFocus = document.activeElement;
   const calculation = state.calculations.find(item => item.id === id);
-  document.querySelector("#calculationModalTitle").textContent = id ? "ê³ì° ê²°ê³¼ í¸ì§" : "ê³ì° ê²°ê³¼ ì¶ê°";
+  document.querySelector("#calculationModalTitle").textContent = id ? "계산 결과 편집" : "계산 결과 추가";
   elements.calculationId.value = id;
   elements.calculationName.value = calculation?.name || "";
   elements.calculationScope.value = calculation?.scope || "date";
@@ -1936,10 +1963,10 @@ function updateCalculationPreview() {
   if (!elements.calculationPreview) return;
   const left = operandFromForm("left");
   const right = operandFromForm("right");
-  const operatorLabels = { add: "+", subtract: "â", multiply: "Ã", divide: "Ã·", min: "ìµìê°", max: "ìµëê°" };
+  const operatorLabels = { add: "+", subtract: "−", multiply: "×", divide: "÷", min: "최솟값", max: "최댓값" };
   const fake = { left, right, operator: elements.calculationOperator.value };
   elements.calculationPreview.textContent =
-    `${describeExpression(fake)} â ê²°ê³¼ Ã ${Number(elements.calculationMultiply.value) || 0} + ${Number(elements.calculationAdd.value) || 0}`;
+    `${describeExpression(fake)} → 결과 × ${Number(elements.calculationMultiply.value) || 0} + ${Number(elements.calculationAdd.value) || 0}`;
 }
 function closeCalculationEditor() {
   elements.calculationModal.hidden = true;
@@ -1949,12 +1976,12 @@ function closeCalculationEditor() {
 function submitCalculation() {
   const id = elements.calculationId.value;
   const name = elements.calculationName.value.trim().slice(0, 30);
-  if (!name) { showToast("ê³ì° ê²°ê³¼ ì´ë¦ì ìë ¥í´ ì£¼ì¸ì."); return; }
-  if (!id && state.calculations.length >= MAX_CALCULATIONS) { showToast("ê³ì° ê²°ê³¼ë ìµë 20ê°ìëë¤."); return; }
+  if (!name) { showToast("계산 결과 이름을 입력해 주세요."); return; }
+  if (!id && state.calculations.length >= MAX_CALCULATIONS) { showToast("계산 결과는 최대 20개입니다."); return; }
   const left = operandFromForm("left");
   const right = operandFromForm("right");
   if ((left.type !== "constant" && !left.sourceId) || (right.type !== "constant" && !right.sourceId)) {
-    showToast("ê³ì°í  ëì í­ëª©ì ì íí´ ì£¼ì¸ì.");
+    showToast("계산할 대상 항목을 선택해 주세요.");
     return;
   }
   const calculation = {
@@ -1979,7 +2006,7 @@ function submitCalculation() {
   renderMonthCalculations();
   renderHomeCalculations();
   closeCalculationEditor();
-  showToast("ê³ì° ê²°ê³¼ë¥¼ ì ì¥íìµëë¤.");
+  showToast("계산 결과를 저장했습니다.");
 }
 
 function updateFieldEditorVisibility() {
@@ -1992,11 +2019,11 @@ function updateFieldEditorVisibility() {
   document.querySelector("#editorRequiredWrap").hidden = isStatus;
 }
 const RECORD_PRESETS = {
-  workTime:{name:"ìì ìê°",type:"number",unit:"ìê°",min:0,max:24},
-  money:{name:"ê¸ì¡",type:"currency",unit:"ì",min:0,max:null},
-  place:{name:"ì¥ì",type:"text",unit:"",min:null,max:null},
-  done:{name:"ìë£ ì¬ë¶",type:"checkbox",unit:"",min:null,max:null},
-  choice:{name:"ì í í­ëª©",type:"select",unit:"",min:null,max:null,options:["í­ëª© 1","í­ëª© 2"]}
+  workTime:{name:"작업 시간",type:"number",unit:"시간",min:0,max:24},
+  money:{name:"금액",type:"currency",unit:"원",min:0,max:null},
+  place:{name:"장소",type:"text",unit:"",min:null,max:null},
+  done:{name:"완료 여부",type:"checkbox",unit:"",min:null,max:null},
+  choice:{name:"선택 항목",type:"select",unit:"",min:null,max:null,options:["항목 1","항목 2"]}
 };
 function openRecordPreset(presetId) {
   if (presetId === "custom") { openEditor("field"); return; }
@@ -2016,7 +2043,7 @@ function openEditor(kind, id = "") {
   elements.editorKind.value = kind;
   elements.editorId.value = id;
   const isStatus = kind === "status";
-  elements.editorModalTitle.textContent = id ? `${isStatus ? "ë ì§ ìí" : "ê¸°ë¡ í­ëª©"} í¸ì§` : `${isStatus ? "ë ì§ ìí" : "ê¸°ë¡ í­ëª©"} ì¶ê°`;
+  elements.editorModalTitle.textContent = id ? `${isStatus ? "날짜 상태" : "기록 항목"} 편집` : `${isStatus ? "날짜 상태" : "기록 항목"} 추가`;
   elements.editorShortNameWrap.hidden = !isStatus;
   elements.editorColorWrap.hidden = !isStatus;
   elements.editorTypeWrap.hidden = isStatus;
@@ -2045,10 +2072,10 @@ function submitEditor() {
   const kind = elements.editorKind.value;
   const id = elements.editorId.value;
   const name = elements.editorName.value.trim().slice(0, 20);
-  if (!name) { showToast("ì´ë¦ì ìë ¥í´ ì£¼ì¸ì."); return; }
+  if (!name) { showToast("이름을 입력해 주세요."); return; }
 
   if (kind === "status") {
-    if (!id && state.statuses.length >= MAX_STATUSES) { showToast("ë ì§ ìíë ìµë 12ê°ìëë¤."); return; }
+    if (!id && state.statuses.length >= MAX_STATUSES) { showToast("날짜 상태는 최대 12개입니다."); return; }
     const item = {
       id: id || makeUniqueId("status", state.statuses.map(entry => entry.id)),
       name,
@@ -2059,13 +2086,13 @@ function submitEditor() {
     if (index >= 0) state.statuses[index] = item;
     else state.statuses.push(item);
   } else {
-    if (!id && state.fields.length >= MAX_FIELDS) { showToast("ê¸°ë¡ í­ëª©ì ìµë 12ê°ìëë¤."); return; }
+    if (!id && state.fields.length >= MAX_FIELDS) { showToast("기록 항목은 최대 12개입니다."); return; }
     const previous = state.fields.find(entry => entry.id === id);
     const type = FIELD_TYPES.has(elements.editorType.value) ? elements.editorType.value : "text";
     const minValue = elements.editorMin.value === "" ? null : Number(elements.editorMin.value);
     const maxValue = elements.editorMax.value === "" ? null : Number(elements.editorMax.value);
     if (["number", "currency"].includes(type) && minValue !== null && maxValue !== null && minValue > maxValue) {
-      showToast("ìµìê°ì ìµëê°ë³´ë¤ í´ ì ììµëë¤.");
+      showToast("최솟값은 최댓값보다 클 수 없습니다.");
       elements.editorMin.focus();
       return;
     }
@@ -2089,7 +2116,7 @@ function submitEditor() {
   renderSettings();
   renderCalendar();
   closeEditor();
-  showToast("ì¤ì ì ì ì¥íìµëë¤.");
+  showToast("설정을 저장했습니다.");
 }
 function makeUniqueId(prefix, existingIds) {
   let index = Date.now().toString(36);
@@ -2106,17 +2133,17 @@ function deleteEditorItem(kind, id) {
     const patternCount = state.pattern.sequence.filter(statusId => statusId === id).length;
     const calculationCount = state.calculations.filter(calc => [calc.left, calc.right].some(op => op.type === "statusCount" && op.sourceId === id)).length;
     const details = [
-      entryCount && `ë ì§ ê¸°ë¡ ${entryCount}ê±´ì ì§ì  ìí í´ì `,
-      patternCount && `ë°ë³µ í¨í´ ${patternCount}ì¹¸ ì ê±°`,
-      calculationCount && `ì°ê²° ê³ì° ê²°ê³¼ ${calculationCount}ê° ì ê±°`
+      entryCount && `날짜 기록 ${entryCount}건의 직접 상태 해제`,
+      patternCount && `반복 패턴 ${patternCount}칸 제거`,
+      calculationCount && `연결 계산 결과 ${calculationCount}개 제거`
     ].filter(Boolean);
-    if (!confirm(`${item.name} ìíë¥¼ ì­ì í ê¹ì?${details.length ? `\ní¨ê» ì ë¦¬: ${details.join(", ")}` : ""}`)) return;
+    if (!confirm(`${item.name} 상태를 삭제할까요?${details.length ? `\n함께 정리: ${details.join(", ")}` : ""}`)) return;
     state.statuses = state.statuses.filter(entry => entry.id !== id);
   } else {
     const item = state.fields.find(entry => entry.id === id);
     if (!item) return;
     const calculationCount = state.calculations.filter(calc => [calc.left, calc.right].some(op => op.type === "field" && op.sourceId === id)).length;
-    if (!confirm(`${item.name} ìë ¥ í­ëª©ì ì­ì í ê¹ì?\nì ì¥ë ë ì§ ê°ì´ ì ê±°ë©ëë¤.${calculationCount ? `\nì°ê²° ê³ì° ê²°ê³¼ ${calculationCount}ê°ë í¨ê» ì ê±°ë©ëë¤.` : ""}`)) return;
+    if (!confirm(`${item.name} 입력 항목을 삭제할까요?\n저장된 날짜 값이 제거됩니다.${calculationCount ? `\n연결 계산 결과 ${calculationCount}개도 함께 제거됩니다.` : ""}`)) return;
     state.fields = state.fields.filter(entry => entry.id !== id);
   }
   repairReferences();
@@ -2125,7 +2152,7 @@ function deleteEditorItem(kind, id) {
   renderSettings();
   renderCalendar();
   renderSummary();
-  showToast("í­ëª©ê³¼ ì°ê²° ì°¸ì¡°ë¥¼ ìì íê² ì ë¦¬íìµëë¤.");
+  showToast("항목과 연결 참조를 안전하게 정리했습니다.");
 }
 
 
@@ -2138,10 +2165,10 @@ function openTemplatePreview(templateId) {
   previewTemplateId = templateId;
   modalLastFocus = document.activeElement;
   elements.templatePreviewTitle.textContent = template.name;
-  elements.templatePreviewCategory.textContent = `${TEMPLATE_CATEGORY_LABELS[template.custom ? "custom" : template.category] || "ííë¦¿"} Â· v${template.version || 1}`;
+  elements.templatePreviewCategory.textContent = `${TEMPLATE_CATEGORY_LABELS[template.custom ? "custom" : template.category] || "템플릿"} · v${template.version || 1}`;
   elements.templatePreviewDescription.textContent = template.description;
   elements.templatePreviewMeta.replaceChildren();
-  for (const [label, value] of [["ìí",template.statuses.length],["ê¸°ë¡ í­ëª©",template.fields.length],["ê³ì° ê²°ê³¼",template.calculations.length]]) {
+  for (const [label, value] of [["상태",template.statuses.length],["기록 항목",template.fields.length],["계산 결과",template.calculations.length]]) {
     const card = document.createElement("article");
     const small = document.createElement("span"); small.textContent = label;
     const strong = document.createElement("strong"); strong.textContent = String(value);
@@ -2159,20 +2186,20 @@ function openTemplatePreview(templateId) {
   elements.templatePreviewFields.replaceChildren();
   for (const item of template.fields) {
     const row = document.createElement("span");
-    row.textContent = `${item.name} Â· ${item.type}`;
+    row.textContent = `${item.name} · ${item.type}`;
     elements.templatePreviewFields.append(row);
   }
-  if (!template.fields.length) appendEmpty(elements.templatePreviewFields,"ê¸°ë¡ í­ëª© ìì");
+  if (!template.fields.length) appendEmpty(elements.templatePreviewFields,"기록 항목 없음");
   elements.templatePreviewPattern.textContent = template.pattern.enabled
-    ? `${template.pattern.name} Â· ${template.pattern.sequence.length}ì¼ ë°ë³µ`
-    : "ë°ë³µ í¨í´ ìì";
+    ? `${template.pattern.name} · ${template.pattern.sequence.length}일 반복`
+    : "반복 패턴 없음";
   elements.templatePreviewCalculations.replaceChildren();
   for (const item of template.calculations) {
     const row = document.createElement("span");
-    row.textContent = `${item.name} Â· ${item.scope === "month" ? "ìê°" : "ë ì§"}`;
+    row.textContent = `${item.name} · ${item.scope === "month" ? "월간" : "날짜"}`;
     elements.templatePreviewCalculations.append(row);
   }
-  if (!template.calculations.length) appendEmpty(elements.templatePreviewCalculations,"ê³ì° ê²°ê³¼ ìì");
+  if (!template.calculations.length) appendEmpty(elements.templatePreviewCalculations,"계산 결과 없음");
   elements.templatePreviewModal.hidden = false;
   document.body.style.overflow = "hidden";
   requestAnimationFrame(() => document.querySelector("#templatePreviewClose").focus());
@@ -2187,7 +2214,7 @@ function duplicateTemplate(templateId) {
   const source = getTemplateById(templateId);
   if (!source) return;
   if (state.customTemplates.length >= 20) {
-    showToast("ì¬ì©ì ííë¦¿ì ìµë 20ê°ìëë¤.");
+    showToast("사용자 템플릿은 최대 20개입니다.");
     return;
   }
   const ids = [...TEMPLATES.map(item => item.id), ...state.customTemplates.map(item => item.id)];
@@ -2195,13 +2222,13 @@ function duplicateTemplate(templateId) {
     ...structuredClone(source),
     id: makeUniqueId("template", ids),
     version: 1,
-    name: `${source.name} ë³µì¬`.slice(0,30),
-    description: `${source.description} Â· ë³µì ë³¸`.slice(0,80)
+    name: `${source.name} 복사`.slice(0,30),
+    description: `${source.description} · 복제본`.slice(0,80)
   });
   state.customTemplates.push(duplicate);
   saveState();
   renderTemplates();
-  showToast("ë´ ííë¦¿ì¼ë¡ ë³µì íìµëë¤.");
+  showToast("내 템플릿으로 복제했습니다.");
 }
 function openTemplateNameModal() {
   modalLastFocus = document.activeElement;
@@ -2218,12 +2245,12 @@ function closeTemplateNameModal() {
 }
 function saveCustomTemplate() {
   if (state.customTemplates.length >= 20) {
-    showToast("ì¬ì©ì ííë¦¿ì ìµë 20ê°ìëë¤.");
+    showToast("사용자 템플릿은 최대 20개입니다.");
     return;
   }
   const name = elements.customTemplateName.value.trim().slice(0, 30);
   if (!name) {
-    showToast("ííë¦¿ ì´ë¦ì ìë ¥í´ ì£¼ì¸ì.");
+    showToast("템플릿 이름을 입력해 주세요.");
     return;
   }
   const template = sanitizeTemplate({
@@ -2231,7 +2258,7 @@ function saveCustomTemplate() {
     name,
     version: 1,
     category: "custom",
-    description: elements.customTemplateDescription.value.trim().slice(0, 80) || "ì¬ì©ìê° ì ì¥í íì¬ êµ¬ì±",
+    description: elements.customTemplateDescription.value.trim().slice(0, 80) || "사용자가 저장한 현재 구성",
     statuses: state.statuses,
     fields: state.fields,
     pattern: state.pattern,
@@ -2243,18 +2270,18 @@ function saveCustomTemplate() {
   saveState();
   renderTemplates();
   closeTemplateNameModal();
-  showToast("íì¬ êµ¬ì±ì ì¬ì©ì ííë¦¿ì¼ë¡ ì ì¥íìµëë¤.");
+  showToast("현재 구성을 사용자 템플릿으로 저장했습니다.");
 }
 function deleteCustomTemplate(templateId) {
   const template = state.customTemplates.find(item => item.id === templateId);
-  if (!template || !confirm(`${template.name} ííë¦¿ì ì­ì í ê¹ì?`)) return;
+  if (!template || !confirm(`${template.name} 템플릿을 삭제할까요?`)) return;
   state.customTemplates = state.customTemplates.filter(item => item.id !== templateId);
   saveState();
   renderTemplates();
 }
 function exportTemplates() {
   if (!state.customTemplates.length) {
-    showToast("ë´ë³´ë¼ ì¬ì©ì ííë¦¿ì´ ììµëë¤.");
+    showToast("내보낼 사용자 템플릿이 없습니다.");
     return;
   }
   const payload = {
@@ -2264,12 +2291,12 @@ function exportTemplates() {
     templates: state.customTemplates
   };
   downloadJson(payload, `custom-calendar-templates-${localISO(new Date())}.json`);
-  showToast("ì¬ì©ì ííë¦¿ íì¼ì ë§ë¤ììµëë¤.");
+  showToast("사용자 템플릿 파일을 만들었습니다.");
 }
 async function importTemplates(file) {
   if (!file) return;
   if (file.size > 1024 * 1024) {
-    showToast("ííë¦¿ íì¼ì 1MB ì´íì¬ì¼ í©ëë¤.");
+    showToast("템플릿 파일은 1MB 이하여야 합니다.");
     return;
   }
   try {
@@ -2289,9 +2316,9 @@ async function importTemplates(file) {
     const skippedCount = imported.length - addedCount;
     saveState();
     renderTemplates();
-    showToast(skippedCount > 0 ? `${addedCount}ê°ë¥¼ ê°ì ¸ìê³  ${skippedCount}ê°ë ì ì¥ íëë¡ ì ì¸íìµëë¤.` : `${addedCount}ê° ííë¦¿ì ê°ì ¸ììµëë¤.`);
+    showToast(skippedCount > 0 ? `${addedCount}개를 가져왔고 ${skippedCount}개는 저장 한도로 제외했습니다.` : `${addedCount}개 템플릿을 가져왔습니다.`);
   } catch {
-    showToast("ì¬ë°ë¥¸ ííë¦¿ íì¼ì´ ìëëë¤.");
+    showToast("올바른 템플릿 파일이 아닙니다.");
   } finally {
     elements.templateFileInput.value = "";
   }
@@ -2325,7 +2352,7 @@ function goToday() {
 }
 function setView(target) {
   if (state.activeView === "settings" && target !== "settings" && layoutDraftDirty) {
-    const discard = confirm("ì ì¥íì§ ìì íë©´ êµ¬ì± ë³ê²½ì´ ììµëë¤.\në³ê²½ì ì·¨ìíê³  ì´ëí ê¹ì?");
+    const discard = confirm("저장하지 않은 화면 구성 변경이 있습니다.\n변경을 취소하고 이동할까요?");
     if (!discard) return;
     layoutDraft = structuredClone(state.layout);
     layoutDraftDirty = false;
@@ -2364,15 +2391,15 @@ function exportData() {
     data: state
   };
   downloadJson(payload, `custom-calendar-stage8-${localISO(new Date())}.json`);
-  showToast("JSON ë°±ì íì¼ì ë§ë¤ììµëë¤.");
+  showToast("JSON 백업 파일을 만들었습니다.");
 }
 function resetData() {
-  if (!confirm("8ë¨ê³ìì ì ì¥í ííë¦¿ ë¼ì´ë¸ë¬ë¦¬, íë©´ êµ¬ì±, ê³ ê¸ ê¸°ë¡ í­ëª©, ê³ì° ê²°ê³¼, í¨í´, íë§, ë ì§ë³ ê¸°ë¡ì ëª¨ë ì´ê¸°íí ê¹ì?")) return;
+  if (!confirm("8단계에서 저장한 템플릿 라이브러리, 화면 구성, 고급 기록 항목, 계산 결과, 패턴, 테마, 날짜별 기록을 모두 초기화할까요?")) return;
   state = createDefaultState();
   saveState();
   setView("calendar");
   renderAll();
-  showToast("8ë¨ê³ ë°ì´í°ë¥¼ ì´ê¸°ííìµëë¤.");
+  showToast("8단계 데이터를 초기화했습니다.");
 }
 function renderAll() {
   applyTheme(state.theme);
@@ -2408,7 +2435,7 @@ function renderMonthPicker() {
   elements.monthPickerGrid.replaceChildren();
   for (let month=0; month<12; month++) {
     const button=document.createElement("button"); button.type="button"; button.dataset.month=String(month);
-    button.textContent=`${month+1}ì`; button.classList.toggle("active",month===pickerMonth);
+    button.textContent=`${month+1}월`; button.classList.toggle("active",month===pickerMonth);
     elements.monthPickerGrid.append(button);
   }
 }
@@ -2479,14 +2506,14 @@ for (const input of [elements.themeBackground, elements.themeSurface, elements.t
 }
 document.querySelector("#saveThemeButton").addEventListener("click", () => {
   applyTheme(themeFromInputs(), true);
-  showToast("íë§ë¥¼ ì ì¥íìµëë¤.");
+  showToast("테마를 저장했습니다.");
 });
 document.querySelector("#resetThemeButton").addEventListener("click", () => {
   const preset = THEME_PRESETS[0];
   Object.assign(state.theme, preset);
   applyTheme(state.theme, true);
   renderThemeEditor();
-  showToast("ê¸°ë³¸ íë§ë¡ ë³µìíìµëë¤.");
+  showToast("기본 테마로 복원했습니다.");
 });
 elements.navOrderEditor.addEventListener("click", event => {
   const button = event.target.closest("[data-nav-move]");
@@ -2527,7 +2554,7 @@ for (const container of [elements.cellItemEditor, elements.detailItemEditor, ele
     if (row.dataset.layoutGroup !== "cell" && items.filter(entry => entry.visible).length < 1) {
       item.visible = true;
       toggle.checked = true;
-      showToast(row.dataset.layoutGroup === "detail" ? "ìì¸ë³´ê¸° í­ëª©ì ìµì 1ê°ê° íìí©ëë¤." : "ìì½ ì¹´ëë ìµì 1ê°ê° íìí©ëë¤.");
+      showToast(row.dataset.layoutGroup === "detail" ? "상세보기 항목은 최소 1개가 필요합니다." : "요약 카드는 최소 1개가 필요합니다.");
     }
   });
 }
@@ -2556,7 +2583,7 @@ document.querySelector("#templateGrid").addEventListener("click", event => {
 document.querySelector("#patternPalette").addEventListener("click", event => {
   const button = event.target.closest(".pattern-add");
   if (!button) return;
-  if (patternDraft.length >= 31) { showToast("ë°ë³µ í¨í´ì ìµë 31ê°ìëë¤."); return; }
+  if (patternDraft.length >= 31) { showToast("반복 패턴은 최대 31개입니다."); return; }
   patternDraft.push(button.dataset.statusId);
   renderPatternDraft();
 });
@@ -2607,8 +2634,8 @@ elements.statusChoiceGrid.addEventListener("click", event => {
   const resolvedStatusId = draftEntry.statusId || getPatternStatusId(parseISO(state.selectedDate));
   const status = getStatus(resolvedStatusId);
   elements.detailStatus.textContent = status
-    ? `${status.name}${draftEntry.statusId ? " Â· ì§ì  ì¤ì " : " Â· ë°ë³µ í¨í´"}`
-    : "ìí ìì";
+    ? `${status.name}${draftEntry.statusId ? " · 직접 설정" : " · 반복 패턴"}`
+    : "상태 없음";
   elements.detailStatusSwatch.style.background = status?.color || "#b4bec5";
   renderStatusChoices();
 });
@@ -2642,13 +2669,13 @@ document.querySelector("#settingsView").addEventListener("click", event => {
     if (button.dataset.action === "edit") openCalculationEditor(button.dataset.id);
     if (button.dataset.action === "delete") {
       const calculation = state.calculations[index];
-      if (confirm(`${calculation.name} ê³ì° ê²°ê³¼ë¥¼ ì­ì í ê¹ì?`)) state.calculations.splice(index, 1);
+      if (confirm(`${calculation.name} 계산 결과를 삭제할까요?`)) state.calculations.splice(index, 1);
     }
     if (button.dataset.action === "duplicate") {
-      if (state.calculations.length >= MAX_CALCULATIONS) { showToast("ê³ì° ê²°ê³¼ë ìµë 20ê°ìëë¤."); return; }
+      if (state.calculations.length >= MAX_CALCULATIONS) { showToast("계산 결과는 최대 20개입니다."); return; }
       const copy = structuredClone(state.calculations[index]);
       copy.id = makeUniqueId("calc", state.calculations.map(item => item.id));
-      copy.name = `${copy.name} ë³µì¬`.slice(0, 30);
+      copy.name = `${copy.name} 복사`.slice(0, 30);
       state.calculations.splice(index + 1, 0, copy);
     }
     if (button.dataset.action === "up" && index > 0) {
