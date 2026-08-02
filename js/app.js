@@ -1418,6 +1418,59 @@ function describeExpression(calculation) {
   const operatorLabels = { add: "+", subtract: "â", multiply: "Ã", divide: "Ã·", min: "min", max: "max" };
   return `${operandLabel(calculation.left)} ${operatorLabels[calculation.operator]} ${operandLabel(calculation.right)}`;
 }
+
+function applyTheme(theme, persist = false) {
+  const safeTheme = {
+    background: safeColor(theme?.background),
+    surface: safeColor(theme?.surface),
+    accent: safeColor(theme?.accent),
+    text: safeColor(theme?.text),
+    radius: ["compact", "balanced", "round"].includes(theme?.radius) ? theme.radius : "balanced",
+    density: ["compact", "comfortable", "spacious"].includes(theme?.density) ? theme.density : "comfortable"
+  };
+  const root = document.documentElement;
+  root.style.setProperty("--bg", safeTheme.background);
+  root.style.setProperty("--surface", safeTheme.surface);
+  root.style.setProperty("--surface-soft", mixHex(safeTheme.surface, safeTheme.background, 0.55));
+  root.style.setProperty("--text", safeTheme.text);
+  root.style.setProperty("--text-soft", mixHex(safeTheme.text, safeTheme.background, 0.48));
+  root.style.setProperty("--line", mixHex(safeTheme.text, safeTheme.background, 0.82));
+  root.style.setProperty("--accent", safeTheme.accent);
+  root.style.setProperty("--accent-soft", mixHex(safeTheme.accent, safeTheme.background, 0.82));
+  root.style.setProperty("--today-ring", safeTheme.accent);
+  root.style.setProperty("--selected", mixHex(safeTheme.accent, safeTheme.background, 0.72));
+  document.body.dataset.radius = safeTheme.radius;
+  document.body.dataset.density = safeTheme.density;
+  elements.themeColorMeta.setAttribute("content", safeTheme.background);
+  if (persist) {
+    state.theme = safeTheme;
+    saveState();
+  }
+}
+function mixHex(foreground, background, ratio) {
+  const fg = hexToRgb(safeColor(foreground));
+  const bg = hexToRgb(safeColor(background));
+  const mix = channel => Math.round(fg[channel] * (1 - ratio) + bg[channel] * ratio);
+  return `#${[mix("r"), mix("g"), mix("b")].map(value => value.toString(16).padStart(2, "0")).join("")}`;
+}
+function hexToRgb(hex) {
+  return {
+    r: parseInt(hex.slice(1, 3), 16),
+    g: parseInt(hex.slice(3, 5), 16),
+    b: parseInt(hex.slice(5, 7), 16)
+  };
+}
+function themeFromInputs() {
+  return {
+    background: elements.themeBackground.value,
+    surface: elements.themeSurface.value,
+    accent: elements.themeAccent.value,
+    text: elements.themeText.value,
+    radius: elements.themeRadius.value,
+    density: elements.themeDensity.value
+  };
+}
+
 function renderThemeEditor() {
   elements.themePresetGrid.replaceChildren();
   for (const preset of THEME_PRESETS) {
